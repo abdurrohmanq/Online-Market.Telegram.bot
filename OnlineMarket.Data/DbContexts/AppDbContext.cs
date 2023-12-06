@@ -37,9 +37,18 @@ public class AppDbContext : DbContext
             .HasForeignKey(p => p.CartId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        modelBuilder.Entity<Order>()
-          .OwnsOne(o => o.DeliveryAddress)
-          .WithOwner();
+        modelBuilder.Entity<CartItem>()
+            .HasOne(ci => ci.Cart)
+            .WithMany(c => c.Items)
+            .HasForeignKey(ci => ci.CartId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Product>()
+            .HasOne(p => p.Category)
+            .WithMany(c => c.Products)
+            .HasForeignKey(p => p.CategoryId)
+            .OnDelete(DeleteBehavior.Restrict);
+
 
         SetData(modelBuilder);
     }

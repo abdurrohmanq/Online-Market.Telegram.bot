@@ -1,18 +1,17 @@
-﻿using Telegram.Bot;
-using Telegram.Bot.Types;
-using Telegram.Bot.Polling;
-using Telegram.Bot.Types.Enums;
+﻿using OnlineMarket.Domain.Entities.Orders;
+using OnlineMarket.Domain.Enums;
+using OnlineMarket.Service.DTOs.Carts;
+using OnlineMarket.Service.DTOs.Orders;
+using OnlineMarket.Service.DTOs.Products;
 using OnlineMarket.Service.DTOs.Users;
 using OnlineMarket.Service.Interfaces;
-using Telegram.Bot.Types.ReplyMarkups;
-using OnlineMarket.Service.DTOs.Products;
-using OnlineMarket.Service.DTOs.Carts;
-using OnlineMarket.Service.Services;
 using OnlineMarket.TelegramBot.Models.Enums;
-using OnlineMarket.Domain.Enums;
-using OnlineMarket.Service.DTOs.Orders;
 using System.Text.RegularExpressions;
-using OnlineMarket.Domain.Entities.Users;
+using Telegram.Bot;
+using Telegram.Bot.Polling;
+using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace OnlineMarket.TelegramBot.Services;
 
@@ -28,10 +27,10 @@ public partial class UpdateHandler : IUpdateHandler
     private readonly ICategoryService categoryService;
     private readonly ICartItemService cartItemService;
     public UpdateHandler(ILogger<UpdateHandler> logger,
-                         ITelegramBotClient botClient, 
+                         ITelegramBotClient botClient,
                          IUserService userService,
                          ICategoryService categoryService,
-                         IProductService productService, 
+                         IProductService productService,
                          ICartItemService cartItemService,
                          ICartService cartService,
                          IOrderService orderService,
@@ -84,11 +83,11 @@ public partial class UpdateHandler : IUpdateHandler
             ResizeKeyboard = true
         };
 
-       await botClient.SendTextMessageAsync(
-            chatId: message.Chat.Id,
-            text: "Tanlovingizni belgilang:",
-            replyMarkup: replyKeyboard,
-            cancellationToken: cancellationToken);
+        await botClient.SendTextMessageAsync(
+             chatId: message.Chat.Id,
+             text: "Tanlovingizni belgilang:",
+             replyMarkup: replyKeyboard,
+             cancellationToken: cancellationToken);
     }
 
 
@@ -112,7 +111,7 @@ public partial class UpdateHandler : IUpdateHandler
             chatId: message.Chat.Id,
             text: $"Sizning raqamingiz qabul qilindi. Sizning raqamingiz: {userPhoneNumber}",
             cancellationToken: cancellationToken);
-        
+
         await botClient.SendTextMessageAsync(
             chatId: message.Chat.Id,
             text: "Ism sharifingizni kiriting:",
@@ -300,7 +299,7 @@ public partial class UpdateHandler : IUpdateHandler
         branch = message.Text;
 
         var existBranch = await this.filialService.GetByLocationAsync(branch);
-        if(existBranch is not null)
+        if (existBranch is not null)
         {
             await botClient.SendTextMessageAsync(
             chatId: chatId,
@@ -327,12 +326,13 @@ public partial class UpdateHandler : IUpdateHandler
         }
     }
 
-    Location location = new Location();
+    string location = string.Empty;
     private async Task HandleLocationAsync(Message message, CancellationToken cancellationToken)
     {
         this.logger.LogInformation("HandleLocationAsync is working..");
 
-        location = message.Location;
+        location = message.Location.Latitude.ToString();
+        location += message.Location.Longitude.ToString();
 
         if (location != null)
         {
@@ -409,9 +409,9 @@ public partial class UpdateHandler : IUpdateHandler
            {
                 new[] { new KeyboardButton("🏠 Asosiy menu") }
             })
-            {
+        {
             ResizeKeyboard = true
-            };
+        };
 
         await botClient.SendTextMessageAsync(
             chatId: message.Chat.Id,
@@ -572,7 +572,7 @@ public partial class UpdateHandler : IUpdateHandler
                     text: "Buyurtma tasdiqlandi. Buyurtmangizni olib ketishingiz mumkin.",
                     cancellationToken: cancellationToken);
         }
-        else if(message.Text == "❌ Bekor qilish")
+        else if (message.Text == "❌ Bekor qilish")
         {
             await DisplayCategoryKeyboardAsync(chatId, cancellationToken);
 
@@ -737,7 +737,7 @@ public partial class UpdateHandler : IUpdateHandler
                 text: $"{productName} savatdan o'chdi!",
                 cancellationToken: cancellationToken);
 
-            if(cart.Items.Count == 1)
+            if (cart.Items.Count == 1)
                 await DisplayCategoryKeyboardAsync(chatId, cancellationToken);
             else
                 await HandleCartAsync(message, cancellationToken);
@@ -809,12 +809,12 @@ public partial class UpdateHandler : IUpdateHandler
         {
         new KeyboardButton("🏠 Asosiy menu"),
         new KeyboardButton("⬅️ Product menu"),
-        new KeyboardButton("🛒 Savat") 
+        new KeyboardButton("🛒 Savat")
         }
         })
-            {
-                ResizeKeyboard = true
-            };
+        {
+            ResizeKeyboard = true
+        };
 
         await botClient.SendTextMessageAsync(
             chatId: chatId,

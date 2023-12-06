@@ -7,6 +7,7 @@ using OnlineMarket.Service.DTOs.Orders;
 using OnlineMarket.Domain.Entities.Carts;
 using OnlineMarket.Domain.Entities.Orders;
 using OnlineMarket.Domain.Entities.Products;
+using OnlineMarket.Data.DbContexts;
 
 namespace OnlineMarket.Service.Services;
 
@@ -15,36 +16,39 @@ public class OrderService : IOrderService
     private readonly IMapper mapper;
     private readonly IRepository<Order> repository;
     private readonly IRepository<Cart> cartRepository;
-    private readonly IRepository<Product> productRepository;
     private readonly ICartItemService cartItemService;
+    private readonly IRepository<Product> productRepository;
+    private readonly AppDbContext appDbContext;
     public OrderService(IMapper mapper,
                         IRepository<Order> repository,
                         IRepository<Cart> cartRepository,
                         ICartItemService cartItemService,
-                        IRepository<Product> productRepository)
+                        IRepository<Product> productRepository,
+                        AppDbContext appDbContext)
     {
         this.mapper = mapper;
         this.repository = repository;
         this.cartRepository = cartRepository;
         this.cartItemService = cartItemService;
         this.productRepository = productRepository;
+        this.appDbContext = appDbContext;
     }
 
     public async Task<OrderResultDto> AddAsync(OrderCreationDto dto)
     {
+
         var existCart = await cartRepository.GetAsync(c => c.Id.Equals(dto.CartId), includes: new[] {"Items", "Items.Product"});
         var mapped = this.mapper.Map<Order>(dto);
         mapped.Cart = existCart;
-/*
+
         foreach(var cartItem in existCart.Items) 
         {
             var product = cartItem.Product;
             product.StockQuantity -= cartItem.Quantity;
             this.productRepository.Update(product);
         }
-*/
-        await this.repository.CreateAsync(mapped);
 
+        await this.repository.CreateAsync(mapped);
         await cartItemService.DeleteAllCartItems(existCart.Id);
 
         return this.mapper.Map<OrderResultDto>(mapped);
