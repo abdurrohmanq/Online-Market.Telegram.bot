@@ -282,6 +282,8 @@ public partial class UpdateHandler : IUpdateHandler
 
         var replyKeyboard = new ReplyKeyboardMarkup(allButtons) { ResizeKeyboard = true };
 
+        orderType = OrderType.Olib_ketish;
+
         await botClient.SendTextMessageAsync(
             chatId: chatId,
             text: "O'zingizga yaqin filiani tanlang:",
