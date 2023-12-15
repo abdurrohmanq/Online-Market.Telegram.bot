@@ -26,15 +26,17 @@ public partial class UpdateHandler : IUpdateHandler
     private readonly IProductService productService;
     private readonly ICategoryService categoryService;
     private readonly ICartItemService cartItemService;
+    private readonly IOrderItemService orderItemService;
     public UpdateHandler(ILogger<UpdateHandler> logger,
                          ITelegramBotClient botClient,
                          IUserService userService,
-                         ICategoryService categoryService,
-                         IProductService productService,
-                         ICartItemService cartItemService,
                          ICartService cartService,
                          IOrderService orderService,
-                         IFilialService filialService)
+                         IFilialService filialService,
+                         IProductService productService,
+                         ICategoryService categoryService,
+                         ICartItemService cartItemService,
+                         IOrderItemService orderItemService)
     {
         this.logger = logger;
         this.botClient = botClient;
@@ -45,6 +47,7 @@ public partial class UpdateHandler : IUpdateHandler
         this.productService = productService;
         this.cartItemService = cartItemService;
         this.categoryService = categoryService;
+        this.orderItemService = orderItemService;
     }
 
     private async Task BotOnSendMessageAsync(Message message, CancellationToken cancellationToken)
@@ -95,12 +98,11 @@ public partial class UpdateHandler : IUpdateHandler
     {
         var contact = message.Contact;
         var userPhoneNumber = contact.PhoneNumber;
-        long chatId = message.Chat.Id;
 
         var user = new UserCreationDto()
         {
             Phone = userPhoneNumber,
-            ChatId = chatId
+            ChatId = message.Chat.Id
         };
 
         await userService.AddAsync(user);
@@ -117,12 +119,14 @@ public partial class UpdateHandler : IUpdateHandler
             text: "Ism sharifingizni kiriting:",
             cancellationToken: cancellationToken);
 
-        userStates[chatId] = UserState.WaitingForUserFullName;
+        userStates[message.Chat.Id] = UserState.WaitingForUserFullName;
     }
 
     private async Task HandleUserInfoAsync(Message message, CancellationToken cancellationToken)
     {
         var fullName = message.Text;
+        var existUser = await userService.GetByChatId(message.Chat.Id);
+
         var user = new UserUpdateDto()
         {
             Id = existUser.Id,
@@ -139,11 +143,13 @@ public partial class UpdateHandler : IUpdateHandler
             cancellationToken: cancellationToken);
 
         await BotOnSendMenuAsync(message, cancellationToken);
-        userStates[chatId] = UserState.None;
+        userStates[message.Chat.Id] = UserState.None;
     }
 
     private async Task HandlePhoneNumber(Message message, CancellationToken cancellationToken)
     {
+        var existUser = await userService.GetByChatId(message.Chat.Id);
+
         if (Regex.IsMatch(message.Text, @"^\+(\d{12})$"))
         {
             var user = new UserUpdateDto()
@@ -161,7 +167,7 @@ public partial class UpdateHandler : IUpdateHandler
             text: "Raqamingiz yangilandi. Davom etamizmi?",
             cancellationToken: cancellationToken);
 
-            userStates[chatId] = UserState.None;
+            userStates[message.Chat.Id] = UserState.None;
             await BotOnSendMenuAsync(message, cancellationToken);
         }
         else
@@ -221,7 +227,8 @@ public partial class UpdateHandler : IUpdateHandler
             cancellationToken: cancellationToken);
     }
 
-    OrderType orderType = new OrderType();
+    private Dictionary<long, OrderType> orderType = new Dictionary<long, OrderType>();
+
     private async Task HandleDeliveryAsync(Message message, CancellationToken cancellationToken)
     {
         this.logger.LogInformation("HandleDeliveryAsync is working..");
@@ -238,7 +245,7 @@ public partial class UpdateHandler : IUpdateHandler
             ResizeKeyboard = true
         };
 
-        orderType = OrderType.Yetkazib_berish;
+        orderType[message.Chat.Id] = OrderType.Yetkazib_berish;
 
         await botClient.SendTextMessageAsync(
             chatId: message.Chat.Id,
@@ -282,33 +289,33 @@ public partial class UpdateHandler : IUpdateHandler
 
         var replyKeyboard = new ReplyKeyboardMarkup(allButtons) { ResizeKeyboard = true };
 
-        orderType = OrderType.Olib_ketish;
+        orderType[message.Chat.Id] = OrderType.Olib_ketish;
 
         await botClient.SendTextMessageAsync(
-            chatId: chatId,
+            chatId: message.Chat.Id,
             text: "O'zingizga yaqin filiani tanlang:",
             replyMarkup: replyKeyboard,
             cancellationToken: cancellationToken);
 
-        userStates[chatId] = UserState.WaitingForFilialSelection;
+        userStates[message.Chat.Id] = UserState.WaitingForFilialSelection;
     }
 
-    string branch = string.Empty;
+    private Dictionary<long, string> branch = new Dictionary<long, string>();
     private async Task HandleFilialSelectionAsync(Message message, CancellationToken cancellationToken)
     {
         this.logger.LogInformation("HandleFilialSelectionAsync is working...");
 
-        branch = message.Text;
+        branch[message.Chat.Id] = message.Text;
 
-        var existBranch = await this.filialService.GetByLocationAsync(branch);
+        var existBranch = await this.filialService.GetByLocationAsync(branch[message.Chat.Id]);
         if (existBranch is not null)
         {
             await botClient.SendTextMessageAsync(
-            chatId: chatId,
+            chatId: message.Chat.Id,
             text: "Yaxshi! Buyurtma berishni boshlang:",
             cancellationToken: cancellationToken);
 
-            await DisplayCategoryKeyboardAsync(chatId, cancellationToken);
+            await DisplayCategoryKeyboardAsync(message.Chat.Id, cancellationToken);
         }
         else
         {
@@ -321,20 +328,20 @@ public partial class UpdateHandler : IUpdateHandler
             };
 
             await botClient.SendTextMessageAsync(
-            chatId: chatId,
+            chatId: message.Chat.Id,
             text: "Hozircha bunda filial yo'q",
             replyMarkup: replyKeyboard,
             cancellationToken: cancellationToken);
         }
     }
 
-    string location = string.Empty;
+    private Dictionary<long, string> location = new Dictionary<long, string>();
     private async Task HandleLocationAsync(Message message, CancellationToken cancellationToken)
     {
         this.logger.LogInformation("HandleLocationAsync is working..");
 
-        location = message.Location.Latitude.ToString();
-        location += message.Location.Longitude.ToString();
+        location[message.Chat.Id] = message.Location.Latitude.ToString() + " ";
+        location[message.Chat.Id] += message.Location.Longitude.ToString();
 
         if (location != null)
         {
@@ -421,7 +428,7 @@ public partial class UpdateHandler : IUpdateHandler
             replyMarkup: replyKeyboard,
             cancellationToken: cancellationToken);
 
-        userStates[chatId] = UserState.None;
+        userStates[message.Chat.Id] = UserState.None;
     }
 
     private async Task HandleSettingsAsync(Message message, CancellationToken cancellationToken)
@@ -488,31 +495,34 @@ public partial class UpdateHandler : IUpdateHandler
             cancellationToken: cancellationToken);
     }
 
-    IEnumerable<ProductResultDto> products = new List<ProductResultDto>();
+    private Dictionary<long, IEnumerable<ProductResultDto>> products = new Dictionary<long, IEnumerable<ProductResultDto>>();
+
     private async Task HandleCategorySelectionAsync(Message message, CancellationToken cancellationToken)
     {
         var selectedCategoryName = message.Text;
 
-        products = await productService.GetByCategoryName(selectedCategoryName);
+        products[message.Chat.Id] = await productService.GetByCategoryName(selectedCategoryName);
         if (products.Count() == 0)
         {
             await botClient.SendTextMessageAsync(
-            chatId: chatId,
+            chatId: message.Chat.Id,
             text: "Hozircha bu categoryda mahsulot yo'q",
             cancellationToken: cancellationToken);
 
-            await DisplayCategoryKeyboardAsync(chatId, cancellationToken);
+            await DisplayCategoryKeyboardAsync(message.Chat.Id, cancellationToken);
         }
         else
         {
-            userStates[chatId] = UserState.WaitingForProductSelection;
-            await DisplayProductsKeyboardAsync(message.Chat.Id, products, cancellationToken);
+            userStates[message.Chat.Id] = UserState.WaitingForProductSelection;
+            await DisplayProductsKeyboardAsync(message.Chat.Id, products[message.Chat.Id], cancellationToken);
         }
     }
 
     private async Task HandleOrderAction(Message message, CancellationToken cancellationToken)
     {
+        var existUser = await userService.GetByChatId(message.Chat.Id);
         var cart = await cartService.GetByUserId(existUser.Id);
+
         if (cart.Items.Count() > 0)
         {
             var replyKeyboard = new ReplyKeyboardMarkup(new[]
@@ -525,21 +535,21 @@ public partial class UpdateHandler : IUpdateHandler
             };
 
             await botClient.SendTextMessageAsync(
-            chatId: chatId,
+            chatId: message.Chat.Id,
             text: "Qo'shimcha fikrlaringiz bo'lsa, yozib qoldiring:",
             replyMarkup: replyKeyboard,
             cancellationToken: cancellationToken);
 
-            userStates[chatId] = UserState.WaitingForCommentAction;
+            userStates[message.Chat.Id] = UserState.WaitingForCommentAction;
         }
         else
         {
             await botClient.SendTextMessageAsync(
-            chatId: chatId,
+            chatId: message.Chat.Id,
             text: "Sizning savatingiz bo'sh. Mahsulot buyurtma bering!",
             cancellationToken: cancellationToken);
 
-            await DisplayCategoryKeyboardAsync(chatId, cancellationToken);
+            await DisplayCategoryKeyboardAsync(message.Chat.Id, cancellationToken);
         }
     }
 
@@ -547,67 +557,90 @@ public partial class UpdateHandler : IUpdateHandler
     {
         this.logger.LogInformation("ShowOrderAsync is working...");
 
+        var existUser = await userService.GetByChatId(message.Chat.Id);
+
         if (message.Text == "✅ Tasdiqlash")
         {
             var cart = await cartService.GetByUserId(existUser.Id);
 
             var order = new OrderCreationDto()
             {
-                Description = description,
-                OrderType = orderType,
-                DeliveryAddress = location,
-                PaymentMethod = paymentMethod,
-                MarketAddress = branch,
+                Description = description.TryGetValue(message.Chat.Id, out var desc) ? desc : null,
+                OrderType = orderType.TryGetValue(message.Chat.Id, out var oType) ? oType : default(OrderType),
+                DeliveryAddress = location.TryGetValue(message.Chat.Id, out var loc) ? loc : null,
+                PaymentMethod = paymentMethod.TryGetValue(message.Chat.Id, out var payMethod) ? payMethod : default(PaymentMethod),
+                MarketAddress = branch.TryGetValue(message.Chat.Id, out var br) ? br : null,
                 CartId = cart.Id,
+                UserId = existUser.Id
             };
 
-            await this.orderService.AddAsync(order);
+            var orderResult = await this.orderService.AddAsync(order);
 
-            if (orderType == OrderType.Yetkazib_berish)
+            foreach (var item in cart.Items)
+            {
+                var orderItem = new OrderItemCreationDto()
+                {
+                    Quantity = item.Quantity,
+                    Price = item.Price,
+                    Sum = item.Sum,
+                    OrderId = orderResult.Id,
+                    ProductId = item.Product.Id,
+                };
+
+                await this.orderItemService.AddAsync(orderItem);
+            }
+
+            await this.cartItemService.DeleteAllCartItems(cart.Id);
+
+
+            if (orderType[message.Chat.Id] == OrderType.Yetkazib_berish)
                 await botClient.SendTextMessageAsync(
-                    chatId: chatId,
+                    chatId: message.Chat.Id,
                     text: "Salomat bo'ling! Buyurtmangiz tez orada yetkazib beriladi.",
                     cancellationToken: cancellationToken);
             else
                 await botClient.SendTextMessageAsync(
-                    chatId: chatId,
+                    chatId: message.Chat.Id,
                     text: "Buyurtma tasdiqlandi. Buyurtmangizni olib ketishingiz mumkin.",
                     cancellationToken: cancellationToken);
+
+
         }
         else if (message.Text == "❌ Bekor qilish")
         {
-            await DisplayCategoryKeyboardAsync(chatId, cancellationToken);
+            await DisplayCategoryKeyboardAsync(message.Chat.Id, cancellationToken);
 
             await botClient.SendTextMessageAsync(
-                   chatId: chatId,
+                   chatId: message.Chat.Id,
                    text: "Yana nimalar sotib olmoqchisiz?",
                    cancellationToken: cancellationToken);
         }
     }
 
-    PaymentMethod paymentMethod = new PaymentMethod();
+    private Dictionary<long, PaymentMethod> paymentMethod = new Dictionary<long, PaymentMethod>();
     private async Task HandlePaymentMethod(Message message, CancellationToken cancellationToken)
     {
         switch (message.Text)
         {
             case "💵 Naqd pul":
-                paymentMethod = PaymentMethod.Naqd;
+                paymentMethod[message.Chat.Id] = PaymentMethod.Naqd;
                 break;
             case "💳 Payme":
-                paymentMethod = PaymentMethod.Payme;
+                paymentMethod[message.Chat.Id] = PaymentMethod.Payme;
                 break;
             case "💳 Click":
-                paymentMethod = PaymentMethod.Click;
+                paymentMethod[message.Chat.Id] = PaymentMethod.Click;
                 break;
         }
 
+        var existUser = await userService.GetByChatId(message.Chat.Id);
         var cart = await cartService.GetByUserId(existUser.Id);
 
         var cartItems = await cartItemService.GetByCartId(cart.Id);
 
         var cartItemsText = string.Join("\n\n", cartItems.Select(item => $"{item.Product.Name}: {item.Quantity} x {item.Price} = {item.Sum}"));
         cartItemsText = "🛒 Savat:\n\n" + cartItemsText;
-        cartItemsText = $"Sizning buyurtmangiz:\n\n Buyurtma turi: {orderType.ToString()}\n\n ☎️ Telefon: {existUser.Phone}\n\n 💴 To'lov turi: {paymentMethod.ToString()}\n\n Izohlar: {description}\n\n" + cartItemsText;
+        cartItemsText = $"Sizning buyurtmangiz:\n\n Buyurtma turi: {orderType[message.Chat.Id].ToString()}\n\n ☎️ Telefon: {existUser.Phone}\n\n 💴 To'lov turi: {paymentMethod[message.Chat.Id].ToString()}\n\n Izohlar: {description[message.Chat.Id]}\n\n" + cartItemsText;
         cartItemsText += $"\n\n Jami: {cart.TotalPrice} so'm";
 
         var replyKeyboard = new ReplyKeyboardMarkup(new[]
@@ -619,21 +652,21 @@ public partial class UpdateHandler : IUpdateHandler
             ResizeKeyboard = true
         };
 
-        userStates[chatId] = UserState.WaitingForOrderSaveAction;
+        userStates[message.Chat.Id] = UserState.WaitingForOrderSaveAction;
 
         await botClient.SendTextMessageAsync(
-                    chatId: chatId,
+                    chatId: message.Chat.Id,
                     text: cartItemsText,
                     replyMarkup: replyKeyboard,
                     cancellationToken: cancellationToken);
     }
 
-    string description = string.Empty;
+    private Dictionary<long, string> description = new Dictionary<long, string>();
     private async Task HandleDescriptionAsync(Message message, CancellationToken cancellationToken)
     {
         this.logger.LogInformation("HandleDescriptionAsync is working...");
 
-        description = message.Text;
+        description[message.Chat.Id] = message.Text;
 
         var replyKeyboard = new ReplyKeyboardMarkup(new[]
             {
@@ -646,17 +679,18 @@ public partial class UpdateHandler : IUpdateHandler
         };
 
         await botClient.SendTextMessageAsync(
-           chatId: chatId,
+           chatId: message.Chat.Id,
            text: "Buyurtmangiz uchun to'lov turini tanlang!",
            replyMarkup: replyKeyboard,
            cancellationToken: cancellationToken);
 
-        userStates[chatId] = UserState.WaitingForPaymentTypeAction;
+        userStates[message.Chat.Id] = UserState.WaitingForPaymentTypeAction;
     }
 
     private async Task HandleCartAsync(Message message, CancellationToken cancellationToken)
     {
         this.logger.LogInformation("HandleCartAsync is working..");
+        var existUser = await userService.GetByChatId(message.Chat.Id);
 
         var cart = await cartService.GetByUserId(existUser.Id);
 
@@ -700,34 +734,34 @@ public partial class UpdateHandler : IUpdateHandler
             cartItemsText += $"\n\n Jami: {cart.TotalPrice} so'm";
 
             await botClient.SendTextMessageAsync(
-               chatId: chatId,
+               chatId: message.Chat.Id,
                text: $"❌ <Mahsulot nomi> - savatdan o'chirish\n" +
                      $"«🔄 Tozalash» - savatni butunlay bo'shatish",
                cancellationToken: cancellationToken);
 
             await botClient.SendTextMessageAsync(
-                chatId: chatId,
+                chatId: message.Chat.Id,
                 text: cartItemsText,
                 replyMarkup: replyKeyboard,
                 cancellationToken: cancellationToken);
 
-            userStates[chatId] = UserState.WaitingForCartAction;
+            userStates[message.Chat.Id] = UserState.WaitingForCartAction;
         }
         else
         {
             await botClient.SendTextMessageAsync(
-                chatId: chatId,
+                chatId: message.Chat.Id,
                 text: "Sizning savatingiz bo'sh. Buyurtma berish uchun mahsulot tanlang",
                 cancellationToken: cancellationToken);
 
-            await DisplayCategoryKeyboardAsync(chatId, cancellationToken);
+            await DisplayCategoryKeyboardAsync(message.Chat.Id, cancellationToken);
         }
     }
 
     private async Task HandleProductForDeleteAsync(Message message, CancellationToken cancellationToken)
     {
         this.logger.LogInformation("HandleProductForDeleteAsync is working..");
-
+        var existUser = await userService.GetByChatId(message.Chat.Id);
         var cart = await cartService.GetByUserId(existUser.Id);
         var productName = message.Text;
 
@@ -735,12 +769,12 @@ public partial class UpdateHandler : IUpdateHandler
         if (isTrue)
         {
             await botClient.SendTextMessageAsync(
-                chatId: chatId,
+                chatId: message.Chat.Id,
                 text: $"{productName} savatdan o'chdi!",
                 cancellationToken: cancellationToken);
 
             if (cart.Items.Count == 1)
-                await DisplayCategoryKeyboardAsync(chatId, cancellationToken);
+                await DisplayCategoryKeyboardAsync(message.Chat.Id, cancellationToken);
             else
                 await HandleCartAsync(message, cancellationToken);
         }
@@ -749,22 +783,22 @@ public partial class UpdateHandler : IUpdateHandler
     private async Task HandleCleanCartAsync(Message message, CancellationToken cancellationToken)
     {
         this.logger.LogInformation("HandleCleanCartAsync is working...");
-
+        var existUser = await userService.GetByChatId(message.Chat.Id);
         var cart = await cartService.GetByUserId(existUser.Id);
 
         var isTrue = await cartItemService.DeleteAllCartItems(cart.Id);
         if (isTrue)
         {
             await botClient.SendTextMessageAsync(
-                chatId: chatId,
+                chatId: message.Chat.Id,
                 text: "Savat bo'shatildi.",
                 cancellationToken: cancellationToken);
 
-            await DisplayCategoryKeyboardAsync(chatId, cancellationToken);
+            await DisplayCategoryKeyboardAsync(message.Chat.Id, cancellationToken);
         }
         else
             await botClient.SendTextMessageAsync(
-                chatId: chatId,
+                chatId: message.Chat.Id,
                 text: "Savatda hech narsa yo'q",
                 cancellationToken: cancellationToken);
     }
@@ -775,17 +809,17 @@ public partial class UpdateHandler : IUpdateHandler
         var product = await productService.GetByName(selectedProductName);
 
         await botClient.SendTextMessageAsync(
-            chatId: chatId,
+            chatId: message.Chat.Id,
             text: $"{product.Name}\n {product.Description}\n Mahsulot narxi: {product.Price}",
             cancellationToken: cancellationToken);
 
         await SendProductInputQuantityAsync(message, cancellationToken);
     }
 
-    string selectedProductName = string.Empty;
+    private Dictionary<long, string> selectedProductName = new Dictionary<long, string>();
     private async Task SendProductInputQuantityAsync(Message message, CancellationToken cancellationToken)
     {
-        selectedProductName = message.Text;
+        selectedProductName[message.Chat.Id] = message.Text;
 
         var replyKeyboard = new ReplyKeyboardMarkup(new[]
         {
@@ -819,12 +853,12 @@ public partial class UpdateHandler : IUpdateHandler
         };
 
         await botClient.SendTextMessageAsync(
-            chatId: chatId,
+            chatId: message.Chat.Id,
             text: "Tanlangan mahsulot miqdorini kiriting:",
             replyMarkup: replyKeyboard,
             cancellationToken: cancellationToken);
 
-        userStates[chatId] = UserState.WaitingForQuantityInput;
+        userStates[message.Chat.Id] = UserState.WaitingForQuantityInput;
     }
 
     private async Task HandleQuantityInputAsync(Message message, CancellationToken cancellationToken)
@@ -832,8 +866,8 @@ public partial class UpdateHandler : IUpdateHandler
         int quantity = int.Parse(message.Text);
         if (quantity > 0)
         {
-            var product = await productService.GetByName(selectedProductName);
-            var user = await userService.GetByChatId(chatId);
+            var product = await productService.GetByName(selectedProductName[message.Chat.Id]);
+            var user = await userService.GetByChatId(message.Chat.Id);
             var cart = await cartService.GetByUserId(user.Id);
 
             var cartItemDto = new CartItemCreationDto
@@ -849,14 +883,14 @@ public partial class UpdateHandler : IUpdateHandler
             if (cartItem is not null)
             {
                 await botClient.SendTextMessageAsync(
-                    chatId: chatId,
-                    text: $"{quantity} ta {selectedProductName} savatga qo'shildi!",
+                    chatId: message.Chat.Id,
+                    text: $"{quantity} ta {selectedProductName[message.Chat.Id]} savatga qo'shildi!",
                     cancellationToken: cancellationToken);
             }
             else
             {
                 await botClient.SendTextMessageAsync(
-                    chatId: chatId,
+                    chatId: message.Chat.Id,
                     text: $"Buncha miqdorda mahsulot yo'q!",
                     cancellationToken: cancellationToken);
             }
@@ -864,7 +898,7 @@ public partial class UpdateHandler : IUpdateHandler
         else
         {
             await botClient.SendTextMessageAsync(
-                chatId: chatId,
+                chatId: message.Chat.Id,
                 text: "Noto'g'ri miqdor kiritildi. Iltimos, haqiqiy son kiriting.",
                 cancellationToken: cancellationToken);
         }

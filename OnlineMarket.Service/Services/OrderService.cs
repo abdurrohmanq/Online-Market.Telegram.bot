@@ -18,25 +18,21 @@ public class OrderService : IOrderService
     private readonly IRepository<Cart> cartRepository;
     private readonly ICartItemService cartItemService;
     private readonly IRepository<Product> productRepository;
-    private readonly AppDbContext appDbContext;
     public OrderService(IMapper mapper,
                         IRepository<Order> repository,
                         IRepository<Cart> cartRepository,
                         ICartItemService cartItemService,
-                        IRepository<Product> productRepository,
-                        AppDbContext appDbContext)
+                        IRepository<Product> productRepository)
     {
         this.mapper = mapper;
         this.repository = repository;
         this.cartRepository = cartRepository;
         this.cartItemService = cartItemService;
         this.productRepository = productRepository;
-        this.appDbContext = appDbContext;
     }
 
     public async Task<OrderResultDto> AddAsync(OrderCreationDto dto)
     {
-
         var existCart = await cartRepository.GetAsync(c => c.Id.Equals(dto.CartId), includes: new[] {"Items", "Items.Product"});
         var mapped = this.mapper.Map<Order>(dto);
         mapped.Cart = existCart;
@@ -49,7 +45,7 @@ public class OrderService : IOrderService
         }
 
         await this.repository.CreateAsync(mapped);
-        await cartItemService.DeleteAllCartItems(existCart.Id);
+        await this.repository.SaveChanges();
 
         return this.mapper.Map<OrderResultDto>(mapped);
     }

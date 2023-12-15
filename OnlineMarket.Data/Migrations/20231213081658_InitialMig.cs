@@ -136,8 +136,7 @@ namespace OnlineMarket.Data.Migrations
                         name: "FK_CartItems_Carts_CartId",
                         column: x => x.CartId,
                         principalTable: "Carts",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_CartItems_Products_ProductId",
                         column: x => x.ProductId,
@@ -157,8 +156,8 @@ namespace OnlineMarket.Data.Migrations
                     DeliveryAddress = table.Column<string>(type: "text", nullable: true),
                     MarketAddress = table.Column<string>(type: "text", nullable: true),
                     PaymentMethod = table.Column<int>(type: "integer", nullable: false),
+                    UserId = table.Column<long>(type: "bigint", nullable: false),
                     CartId = table.Column<long>(type: "bigint", nullable: true),
-                    UserId = table.Column<long>(type: "bigint", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     IsDelete = table.Column<bool>(type: "boolean", nullable: false)
@@ -175,7 +174,40 @@ namespace OnlineMarket.Data.Migrations
                         name: "FK_Orders_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "OrderItems",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Quantity = table.Column<double>(type: "double precision", nullable: false),
+                    Price = table.Column<decimal>(type: "numeric", nullable: false),
+                    Sum = table.Column<decimal>(type: "numeric", nullable: false),
+                    OrderId = table.Column<long>(type: "bigint", nullable: false),
+                    ProductId = table.Column<long>(type: "bigint", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsDelete = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OrderItems", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_OrderItems_Orders_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "Orders",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_OrderItems_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.InsertData(
@@ -183,14 +215,14 @@ namespace OnlineMarket.Data.Migrations
                 columns: new[] { "Id", "CreatedAt", "Description", "IsDelete", "Name", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { 1L, new DateTime(2023, 12, 6, 13, 9, 21, 955, DateTimeKind.Utc).AddTicks(580), "Category description 1", false, "FastFood", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 2L, new DateTime(2023, 12, 6, 13, 9, 21, 955, DateTimeKind.Utc).AddTicks(585), "Category description 2", false, "Ichimliklar", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 3L, new DateTime(2023, 12, 6, 13, 9, 21, 955, DateTimeKind.Utc).AddTicks(587), "Category description 3", false, "Kaboblar", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 4L, new DateTime(2023, 12, 6, 13, 9, 21, 955, DateTimeKind.Utc).AddTicks(588), "Category description 4", false, "Suyuq ovqatlar", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 5L, new DateTime(2023, 12, 6, 13, 9, 21, 955, DateTimeKind.Utc).AddTicks(589), "Category description 5", false, "Go'shtli ovqatlar", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 6L, new DateTime(2023, 12, 6, 13, 9, 21, 955, DateTimeKind.Utc).AddTicks(592), "Category description 6", false, "Shashliklar", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 7L, new DateTime(2023, 12, 6, 13, 9, 21, 955, DateTimeKind.Utc).AddTicks(593), "Category description 7", false, "Salatlar", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 8L, new DateTime(2023, 12, 6, 13, 9, 21, 955, DateTimeKind.Utc).AddTicks(594), "Category description 8", false, "Xamirli ovqatlar", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) }
+                    { 1L, new DateTime(2023, 12, 13, 8, 16, 58, 517, DateTimeKind.Utc).AddTicks(6843), "Category description 1", false, "FastFood", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 2L, new DateTime(2023, 12, 13, 8, 16, 58, 517, DateTimeKind.Utc).AddTicks(6850), "Category description 2", false, "Ichimliklar", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 3L, new DateTime(2023, 12, 13, 8, 16, 58, 517, DateTimeKind.Utc).AddTicks(6852), "Category description 3", false, "Kaboblar", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 4L, new DateTime(2023, 12, 13, 8, 16, 58, 517, DateTimeKind.Utc).AddTicks(6853), "Category description 4", false, "Suyuq ovqatlar", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 5L, new DateTime(2023, 12, 13, 8, 16, 58, 517, DateTimeKind.Utc).AddTicks(6854), "Category description 5", false, "Go'shtli ovqatlar", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 6L, new DateTime(2023, 12, 13, 8, 16, 58, 517, DateTimeKind.Utc).AddTicks(6857), "Category description 6", false, "Shashliklar", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 7L, new DateTime(2023, 12, 13, 8, 16, 58, 517, DateTimeKind.Utc).AddTicks(6858), "Category description 7", false, "Salatlar", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 8L, new DateTime(2023, 12, 13, 8, 16, 58, 517, DateTimeKind.Utc).AddTicks(6859), "Category description 8", false, "Xamirli ovqatlar", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) }
                 });
 
             migrationBuilder.InsertData(
@@ -198,10 +230,10 @@ namespace OnlineMarket.Data.Migrations
                 columns: new[] { "Id", "CreatedAt", "IsDelete", "Location", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { 1L, new DateTime(2023, 12, 6, 13, 9, 21, 955, DateTimeKind.Utc).AddTicks(636), false, "Novza", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 2L, new DateTime(2023, 12, 6, 13, 9, 21, 955, DateTimeKind.Utc).AddTicks(640), false, "Chilonzor", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 3L, new DateTime(2023, 12, 6, 13, 9, 21, 955, DateTimeKind.Utc).AddTicks(641), false, "Sergeli", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 4L, new DateTime(2023, 12, 6, 13, 9, 21, 955, DateTimeKind.Utc).AddTicks(642), false, "Oq-tepa", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) }
+                    { 1L, new DateTime(2023, 12, 13, 8, 16, 58, 517, DateTimeKind.Utc).AddTicks(6902), false, "Novza", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 2L, new DateTime(2023, 12, 13, 8, 16, 58, 517, DateTimeKind.Utc).AddTicks(6904), false, "Chilonzor", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 3L, new DateTime(2023, 12, 13, 8, 16, 58, 517, DateTimeKind.Utc).AddTicks(6905), false, "Sergeli", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 4L, new DateTime(2023, 12, 13, 8, 16, 58, 517, DateTimeKind.Utc).AddTicks(6906), false, "Oq-tepa", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) }
                 });
 
             migrationBuilder.InsertData(
@@ -209,24 +241,24 @@ namespace OnlineMarket.Data.Migrations
                 columns: new[] { "Id", "CategoryId", "CreatedAt", "Description", "IsDelete", "Name", "Price", "StockQuantity", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { 1L, 1L, new DateTime(2023, 12, 6, 13, 9, 21, 955, DateTimeKind.Utc).AddTicks(596), "Product Desc", false, "HotDog", 10.0m, 10, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 2L, 1L, new DateTime(2023, 12, 6, 13, 9, 21, 955, DateTimeKind.Utc).AddTicks(606), "Product Desc2", false, "Gamburger", 15.0m, 10, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 3L, 1L, new DateTime(2023, 12, 6, 13, 9, 21, 955, DateTimeKind.Utc).AddTicks(608), "Product Desc3", false, "Lavash", 10.0m, 10, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 4L, 1L, new DateTime(2023, 12, 6, 13, 9, 21, 955, DateTimeKind.Utc).AddTicks(610), "Product Desc4", false, "Non burger", 15.0m, 10, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 5L, 2L, new DateTime(2023, 12, 6, 13, 9, 21, 955, DateTimeKind.Utc).AddTicks(611), "Product Desc5", false, "Coco-Cola", 20.0m, 10, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 6L, 2L, new DateTime(2023, 12, 6, 13, 9, 21, 955, DateTimeKind.Utc).AddTicks(614), "Product Desc6", false, "Pepsi", 25.0m, 10, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 7L, 2L, new DateTime(2023, 12, 6, 13, 9, 21, 955, DateTimeKind.Utc).AddTicks(615), "Product Desc7", false, "Fanta", 20.0m, 10, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 8L, 2L, new DateTime(2023, 12, 6, 13, 9, 21, 955, DateTimeKind.Utc).AddTicks(616), "Product Desc8", false, "Kompot", 25.0m, 10, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 9L, 3L, new DateTime(2023, 12, 6, 13, 9, 21, 955, DateTimeKind.Utc).AddTicks(618), "Product Desc5", false, "Tovuq kabob", 20.0m, 10, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 10L, 3L, new DateTime(2023, 12, 6, 13, 9, 21, 955, DateTimeKind.Utc).AddTicks(620), "Product Desc6", false, "Lo'la kabob", 25.0m, 10, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 11L, 3L, new DateTime(2023, 12, 6, 13, 9, 21, 955, DateTimeKind.Utc).AddTicks(622), "Product Desc5", false, "Mol kabob", 20.0m, 10, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 12L, 3L, new DateTime(2023, 12, 6, 13, 9, 21, 955, DateTimeKind.Utc).AddTicks(623), "Product Desc6", false, "Qo'y kabob", 28.0m, 10, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 13L, 4L, new DateTime(2023, 12, 6, 13, 9, 21, 955, DateTimeKind.Utc).AddTicks(625), "Product Desc13", false, "Sho'rva", 30.0m, 10, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 14L, 4L, new DateTime(2023, 12, 6, 13, 9, 21, 955, DateTimeKind.Utc).AddTicks(626), "Product Desc14", false, "Mastava", 28.0m, 10, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 15L, 5L, new DateTime(2023, 12, 6, 13, 9, 21, 955, DateTimeKind.Utc).AddTicks(628), "Product Desc13", false, "Qozon kabob", 30.0m, 10, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 16L, 5L, new DateTime(2023, 12, 6, 13, 9, 21, 955, DateTimeKind.Utc).AddTicks(629), "Product Desc14", false, "Tovuq go'shti", 28.0m, 10, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 17L, 6L, new DateTime(2023, 12, 6, 13, 9, 21, 955, DateTimeKind.Utc).AddTicks(630), "Product Desc13", false, "Qiyma shashlik", 30.0m, 10, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 18L, 6L, new DateTime(2023, 12, 6, 13, 9, 21, 955, DateTimeKind.Utc).AddTicks(633), "Product Desc14", false, "Burda shashlik", 18.0m, 10, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) }
+                    { 1L, 1L, new DateTime(2023, 12, 13, 8, 16, 58, 517, DateTimeKind.Utc).AddTicks(6863), "Product Desc", false, "HotDog", 10.0m, 10, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 2L, 1L, new DateTime(2023, 12, 13, 8, 16, 58, 517, DateTimeKind.Utc).AddTicks(6870), "Product Desc2", false, "Gamburger", 15.0m, 10, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 3L, 1L, new DateTime(2023, 12, 13, 8, 16, 58, 517, DateTimeKind.Utc).AddTicks(6872), "Product Desc3", false, "Lavash", 10.0m, 10, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 4L, 1L, new DateTime(2023, 12, 13, 8, 16, 58, 517, DateTimeKind.Utc).AddTicks(6874), "Product Desc4", false, "Non burger", 15.0m, 10, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 5L, 2L, new DateTime(2023, 12, 13, 8, 16, 58, 517, DateTimeKind.Utc).AddTicks(6875), "Product Desc5", false, "Coco-Cola", 20.0m, 10, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 6L, 2L, new DateTime(2023, 12, 13, 8, 16, 58, 517, DateTimeKind.Utc).AddTicks(6878), "Product Desc6", false, "Pepsi", 25.0m, 10, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 7L, 2L, new DateTime(2023, 12, 13, 8, 16, 58, 517, DateTimeKind.Utc).AddTicks(6879), "Product Desc7", false, "Fanta", 20.0m, 10, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 8L, 2L, new DateTime(2023, 12, 13, 8, 16, 58, 517, DateTimeKind.Utc).AddTicks(6881), "Product Desc8", false, "Kompot", 25.0m, 10, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 9L, 3L, new DateTime(2023, 12, 13, 8, 16, 58, 517, DateTimeKind.Utc).AddTicks(6882), "Product Desc5", false, "Tovuq kabob", 20.0m, 10, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 10L, 3L, new DateTime(2023, 12, 13, 8, 16, 58, 517, DateTimeKind.Utc).AddTicks(6884), "Product Desc6", false, "Lo'la kabob", 25.0m, 10, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 11L, 3L, new DateTime(2023, 12, 13, 8, 16, 58, 517, DateTimeKind.Utc).AddTicks(6886), "Product Desc5", false, "Mol kabob", 20.0m, 10, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 12L, 3L, new DateTime(2023, 12, 13, 8, 16, 58, 517, DateTimeKind.Utc).AddTicks(6887), "Product Desc6", false, "Qo'y kabob", 28.0m, 10, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 13L, 4L, new DateTime(2023, 12, 13, 8, 16, 58, 517, DateTimeKind.Utc).AddTicks(6889), "Product Desc13", false, "Sho'rva", 30.0m, 10, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 14L, 4L, new DateTime(2023, 12, 13, 8, 16, 58, 517, DateTimeKind.Utc).AddTicks(6890), "Product Desc14", false, "Mastava", 28.0m, 10, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 15L, 5L, new DateTime(2023, 12, 13, 8, 16, 58, 517, DateTimeKind.Utc).AddTicks(6892), "Product Desc13", false, "Qozon kabob", 30.0m, 10, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 16L, 5L, new DateTime(2023, 12, 13, 8, 16, 58, 517, DateTimeKind.Utc).AddTicks(6893), "Product Desc14", false, "Tovuq go'shti", 28.0m, 10, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 17L, 6L, new DateTime(2023, 12, 13, 8, 16, 58, 517, DateTimeKind.Utc).AddTicks(6895), "Product Desc13", false, "Qiyma shashlik", 30.0m, 10, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 18L, 6L, new DateTime(2023, 12, 13, 8, 16, 58, 517, DateTimeKind.Utc).AddTicks(6897), "Product Desc14", false, "Burda shashlik", 18.0m, 10, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) }
                 });
 
             migrationBuilder.CreateIndex(
@@ -243,6 +275,16 @@ namespace OnlineMarket.Data.Migrations
                 name: "IX_Carts_UserId",
                 table: "Carts",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OrderItems_OrderId",
+                table: "OrderItems",
+                column: "OrderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OrderItems_ProductId",
+                table: "OrderItems",
+                column: "ProductId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Orders_CartId",
@@ -268,6 +310,9 @@ namespace OnlineMarket.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "Filials");
+
+            migrationBuilder.DropTable(
+                name: "OrderItems");
 
             migrationBuilder.DropTable(
                 name: "Orders");

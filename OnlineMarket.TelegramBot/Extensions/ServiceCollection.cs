@@ -19,5 +19,6 @@ public static class ServiceCollection
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<ICartItemService, CartItemService>();
+        services.AddScoped<IOrderItemService, OrderItemService>();
     }
 }

@@ -10,5 +10,6 @@ public class OrderCreationDto
     public string DeliveryAddress { get; set; }
     public string MarketAddress { get; set; }
     public PaymentMethod PaymentMethod { get; set; }
+    public long? UserId { get; set; }
     public long? CartId { get; set; }
 }

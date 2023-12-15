@@ -1,7 +1,6 @@
-﻿using Telegram.Bot.Types;
-using Telegram.Bot;
+﻿using Telegram.Bot;
+using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using OnlineMarket.Service.DTOs.Users;
 using OnlineMarket.TelegramBot.Models.Enums;
 
 namespace OnlineMarket.TelegramBot.Services;
@@ -23,6 +22,8 @@ public partial class UpdateHandler
             MessageType.Location => HandleLocationAsync(message, cancellationToken),
             _ => HandleUnknownMessageAsync(client, message, cancellationToken)
         };
+
+        await handler;
     }
 
     private Task HandleUnknownMessageAsync(ITelegramBotClient client, Message message, CancellationToken cancellationToken)
@@ -33,33 +34,30 @@ public partial class UpdateHandler
 
     private Dictionary<long, UserState> userStates = new Dictionary<long, UserState>();
 
-    long chatId = 0;
-    UserResultDto existUser = new UserResultDto();
     private async Task HandleTextMessageAsync(ITelegramBotClient client, Message message, CancellationToken cancellationToken)
     {
-        chatId = message.Chat.Id;
         var from = message.From;
         logger.LogInformation("From: {from.FirstName}", from?.FirstName);
-        existUser = await userService.GetByChatId(chatId);
-      
-        var userState = userStates.TryGetValue(chatId, out var state) ? state : UserState.None;
+        var existUser = await userService.GetByChatId(message.Chat.Id);
+
+        var userState = userStates.TryGetValue(message.Chat.Id, out var state) ? state : UserState.None;
 
         if (message.Text == "🏠 Asosiy menu")
         {
             await BotOnSendMenuAsync(message, cancellationToken);
-            userStates[chatId] = UserState.None;
+            userStates[message.Chat.Id] = UserState.None;
         }
-        else if(message.Text == "🛒 Savat")
+        else if (message.Text == "🛒 Savat")
             await HandleCartAsync(message, cancellationToken);
 
-        else if(message.Text == "🚖 Buyurtma berish")
+        else if (message.Text == "🚖 Buyurtma berish")
             await HandleOrderAction(message, cancellationToken);
 
-        else if(message.Text == "⬅️ Categoriya menu")
-            await DisplayCategoryKeyboardAsync(chatId, cancellationToken);
+        else if (message.Text == "⬅️ Categoriya menu")
+            await DisplayCategoryKeyboardAsync(message.Chat.Id, cancellationToken);
 
-        else if(message.Text == "⬅️ Product menu")
-            await DisplayProductsKeyboardAsync(chatId, products, cancellationToken);
+        else if (message.Text == "⬅️ Product menu")
+            await DisplayProductsKeyboardAsync(message.Chat.Id, products[message.Chat.Id], cancellationToken);
 
         else
         {
@@ -81,17 +79,17 @@ public partial class UpdateHandler
 
                         case "🛍 Buyurtma berish":
                             await HandleOrderAsync(message, cancellationToken);
-                            userStates[chatId] = UserState.WaitingForOrderAction;
+                            userStates[message.Chat.Id] = UserState.WaitingForOrderAction;
                             break;
 
                         case "⚙️ Sozlamalar":
                             await HandleSettingsAsync(message, cancellationToken);
-                            userStates[chatId] = UserState.WaitingForSettingsAction;
+                            userStates[message.Chat.Id] = UserState.WaitingForSettingsAction;
                             break;
 
                         case "✍️ Fikr bildirish":
                             await ShowFeedbackAsync(message, cancellationToken);
-                            userStates[chatId] = UserState.WaitingForFeedBack;
+                            userStates[message.Chat.Id] = UserState.WaitingForFeedBack;
                             break;
 
                         case "☎️ Biz bilan aloqa":
@@ -104,7 +102,7 @@ public partial class UpdateHandler
 
                         default:
                             await client.SendTextMessageAsync(
-                                chatId: chatId,
+                                chatId: message.Chat.Id,
                                 text: "Mahsulot buyurtma bering!",
                                 cancellationToken: cancellationToken);
                             break;
@@ -120,11 +118,12 @@ public partial class UpdateHandler
 
                         case "🏃 Olib ketish":
                             await HandleTakeAwayAsync(message, cancellationToken);
-                            userStates[chatId] = UserState.WaitingForFilialSelection;
+                            userStates[message.Chat.Id] = UserState.WaitingForFilialSelection;
                             break;
+
                         default:
                             await client.SendTextMessageAsync(
-                                chatId: chatId,
+                                chatId: message.Chat.Id,
                                 text: "Iltimos, tanlangan buyurtma amalini bajarish uchun kerakli buyrug'ni tanlang.",
                                 cancellationToken: cancellationToken);
                             break;
@@ -136,7 +135,7 @@ public partial class UpdateHandler
                     break;
 
                 case UserState.WaitingForFilialSelection:
-                    await HandleFilialSelectionAsync(message,cancellationToken);
+                    await HandleFilialSelectionAsync(message, cancellationToken);
                     break;
 
                 case UserState.WaitingForSettingsAction:
@@ -144,23 +143,23 @@ public partial class UpdateHandler
                     {
                         case "Ism sharifni o'zgartirish":
                             await botClient.SendTextMessageAsync(
-                                chatId: chatId,
+                                chatId: message.Chat.Id,
                                 text: "Ism sharifingizni kiriting:",
                                 cancellationToken: cancellationToken);
-                            userStates[chatId] = UserState.WaitingForUserFullName;
+                            userStates[message.Chat.Id] = UserState.WaitingForUserFullName;
                             break;
 
                         case "Raqamni o'zgartirish":
                             await botClient.SendTextMessageAsync(
-                                chatId: chatId,
+                                chatId: message.Chat.Id,
                                 text: "Telefon raqamingizni kiriting: \n Misol - '+998901234567'",
                                 cancellationToken: cancellationToken);
-                            userStates[chatId] = UserState.WaitingForPhoneNumber;
+                            userStates[message.Chat.Id] = UserState.WaitingForPhoneNumber;
                             break;
 
                         default:
                             await client.SendTextMessageAsync(
-                                chatId: chatId,
+                                chatId: message.Chat.Id,
                                 text: "Iltimos, tanlangan sozlamalar amalini bajarish uchun kerakli buyrug'ni tanlang.",
                                 cancellationToken: cancellationToken);
                             break;
@@ -190,6 +189,7 @@ public partial class UpdateHandler
                     else if (message.Text == "🔄 Tozalash")
                         await HandleCleanCartAsync(message, cancellationToken);
                     break;
+
                 case UserState.WaitingForCommentAction:
                     await HandleDescriptionAsync(message, cancellationToken);
                     break;
@@ -204,10 +204,10 @@ public partial class UpdateHandler
 
                 default:
                     await client.SendTextMessageAsync(
-                        chatId: chatId,
+                        chatId: message.Chat.Id,
                         text: "Iltimos, amalni bajarish uchun kerakli buyrug'ni tanlang.",
                         cancellationToken: cancellationToken);
-                    userStates[chatId] = UserState.None;
+                    userStates[message.Chat.Id] = UserState.None;
                     break;
             }
         }

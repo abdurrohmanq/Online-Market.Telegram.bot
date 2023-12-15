@@ -14,6 +14,7 @@ public class BotBackgroundService : BackgroundService
         this.botClient = botClient;
         this.updateHandler = updateHandler;
     }
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var bot = await botClient.GetMeAsync(stoppingToken);
