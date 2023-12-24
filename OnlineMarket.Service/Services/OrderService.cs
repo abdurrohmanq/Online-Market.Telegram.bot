@@ -83,7 +83,7 @@ public class OrderService : IOrderService
 
     public async Task<IEnumerable<OrderResultDto>> GetAllAsync()
     {
-        var allOrders = await repository.GetAll().ToListAsync();
+        var allOrders = await repository.GetAll(includes: new[] {"User", "Items"}).ToListAsync();
 
         return this.mapper.Map<IEnumerable<OrderResultDto>>(allOrders);
     }

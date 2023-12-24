@@ -48,8 +48,16 @@ public class ProductService : IProductService
 
     public async Task<ProductResultDto> UpdateAsync(ProductUpdateDto dto)
     {
-        var existProduct = await repository.GetAsync(product => product.Id.Equals(dto.Id))
+        var existProduct = await repository.GetAsync(product => product.Id.Equals(dto.Id), includes: new[] {"Category"})
             ?? throw new NotFoundException($"This Product is not found with id {dto.Id}");
+        if(existProduct.CategoryId != dto.CategoryId)
+        {
+            var existCategory = await this.categoryRepository.GetAsync(c => c.Id.Equals(dto.CategoryId))
+                ?? throw new NotFoundException("This category is not found!");
+
+            existProduct.Category = existCategory;
+            this.categoryRepository.Update(existCategory);
+        }
 
         this.mapper.Map(dto, existProduct);
         this.repository.Update(existProduct);
@@ -58,7 +66,7 @@ public class ProductService : IProductService
         return this.mapper.Map<ProductResultDto>(existProduct);
     }
 
-    public async Task<ProductResultDto> GetById(long id)
+    public async Task<ProductResultDto> GetByIdAsync(long id)
     {
         var existProduct = await repository.GetAsync(product => product.Id.Equals(id))
             ?? throw new NotFoundException($"This Product is not found with id {id}");
@@ -68,7 +76,7 @@ public class ProductService : IProductService
 
     public async Task<IEnumerable<ProductResultDto>> GetAllAsync()
     {
-        var allProducts = await repository.GetAll().ToListAsync();
+        var allProducts = await repository.GetAll(includes: new[] {"Category"}).ToListAsync();
 
         return this.mapper.Map<IEnumerable<ProductResultDto>>(allProducts);
     }
@@ -85,7 +93,7 @@ public class ProductService : IProductService
 
     public async Task<ProductResultDto> GetByName(string name)
     {
-        var existProduct = await repository.GetAsync(p => p.Name.Equals(name));
+        var existProduct = await repository.GetAsync(p => p.Name.Equals(name), includes: new[] { "Category" });
         return this.mapper.Map<ProductResultDto>(existProduct);
     }
 }

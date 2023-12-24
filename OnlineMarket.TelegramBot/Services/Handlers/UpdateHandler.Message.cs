@@ -2,11 +2,15 @@
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using OnlineMarket.TelegramBot.Models.Enums;
+using OnlineMarket.Domain.Enums;
+using OnlineMarket.Service.DTOs.Users;
 
 namespace OnlineMarket.TelegramBot.Services;
 
 public partial class UpdateHandler
 {
+    private Dictionary<long, bool> isAdminPage = new Dictionary<long, bool>();
+
     private async Task HandleMessageAsync(ITelegramBotClient client, Message message, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(message);
@@ -15,7 +19,25 @@ public partial class UpdateHandler
 
         logger.LogInformation("Received message from {from.FirstName}", from.FirstName);
 
-        var handler = message.Type switch
+        var admin = existAdmin[message.Chat.Id] = await this.userService.GetByChatId(message.Chat.Id);
+
+        if (message.Text == "/admin" && admin is not null)
+            isAdminPage[message.Chat.Id] = true;
+
+        var adminPage = isAdminPage.TryGetValue(message.Chat.Id, out var state) ? state : false;
+
+        if (adminPage)
+        {
+            var handlerAdminMessage = message.Type switch
+            {
+                MessageType.Text => HandleTextForAdminMessageAsync(client, message, cancellationToken),
+                MessageType.Contact => HandleContactForAdminAsync(message, cancellationToken),
+                _ => HandleUnknownMessageAsync(client, message, cancellationToken)
+            };
+            return;
+        }
+
+        var handlerUserMessage = message.Type switch
         {
             MessageType.Text => HandleTextMessageAsync(client, message, cancellationToken),
             MessageType.Contact => HandleContactAsync(message, cancellationToken),
@@ -23,7 +45,7 @@ public partial class UpdateHandler
             _ => HandleUnknownMessageAsync(client, message, cancellationToken)
         };
 
-        await handler;
+        await handlerUserMessage;
     }
 
     private Task HandleUnknownMessageAsync(ITelegramBotClient client, Message message, CancellationToken cancellationToken)
@@ -33,12 +55,13 @@ public partial class UpdateHandler
     }
 
     private Dictionary<long, UserState> userStates = new Dictionary<long, UserState>();
+    private Dictionary<long, UserResultDto> existUser = new Dictionary<long, UserResultDto>();
 
     private async Task HandleTextMessageAsync(ITelegramBotClient client, Message message, CancellationToken cancellationToken)
     {
         var from = message.From;
         logger.LogInformation("From: {from.FirstName}", from?.FirstName);
-        var existUser = await userService.GetByChatId(message.Chat.Id);
+        existUser[message.Chat.Id] = await userService.GetByChatId(message.Chat.Id);
 
         var userState = userStates.TryGetValue(message.Chat.Id, out var state) ? state : UserState.None;
 
@@ -71,7 +94,7 @@ public partial class UpdateHandler
                     switch (message.Text)
                     {
                         case "/start":
-                            if (existUser is null)
+                            if (existUser[message.Chat.Id] is null)
                                 await BotOnSendMessageAsync(message, cancellationToken);
                             else
                                 await BotOnSendMenuAsync(message, cancellationToken);

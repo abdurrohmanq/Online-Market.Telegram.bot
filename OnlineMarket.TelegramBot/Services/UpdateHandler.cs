@@ -36,7 +36,8 @@ public partial class UpdateHandler : IUpdateHandler
                          IProductService productService,
                          ICategoryService categoryService,
                          ICartItemService cartItemService,
-                         IOrderItemService orderItemService)
+                         IOrderItemService orderItemService,
+                         ISecurityService securityService)
     {
         this.logger = logger;
         this.botClient = botClient;
@@ -48,6 +49,7 @@ public partial class UpdateHandler : IUpdateHandler
         this.cartItemService = cartItemService;
         this.categoryService = categoryService;
         this.orderItemService = orderItemService;
+        this.securityService = securityService;
     }
 
     private async Task BotOnSendMessageAsync(Message message, CancellationToken cancellationToken)
@@ -125,17 +127,17 @@ public partial class UpdateHandler : IUpdateHandler
     private async Task HandleUserInfoAsync(Message message, CancellationToken cancellationToken)
     {
         var fullName = message.Text;
-        var existUser = await userService.GetByChatId(message.Chat.Id);
+        var user = existUser[message.Chat.Id];
 
-        var user = new UserUpdateDto()
+        var updateUser = new UserUpdateDto()
         {
-            Id = existUser.Id,
+            Id = user.Id,
             FullName = fullName,
-            Phone = existUser.Phone,
+            Phone = user.Phone,
             ChatId = message.Chat.Id
         };
 
-        await userService.UpdateAsync(user);
+        await userService.UpdateAsync(updateUser);
 
         await botClient.SendTextMessageAsync(
             chatId: message.Chat.Id,
@@ -148,19 +150,19 @@ public partial class UpdateHandler : IUpdateHandler
 
     private async Task HandlePhoneNumber(Message message, CancellationToken cancellationToken)
     {
-        var existUser = await userService.GetByChatId(message.Chat.Id);
+        var user = existUser[message.Chat.Id];
 
         if (Regex.IsMatch(message.Text, @"^\+(\d{12})$"))
         {
-            var user = new UserUpdateDto()
+            var updateUser = new UserUpdateDto()
             {
-                Id = existUser.Id,
+                Id = user.Id,
                 ChatId = message.Chat.Id,
-                FullName = existUser.FullName,
+                FullName = user.FullName,
                 Phone = message.Text
             };
 
-            await userService.UpdateAsync(user);
+            await userService.UpdateAsync(updateUser);
 
             await botClient.SendTextMessageAsync(
             chatId: message.Chat.Id,
@@ -520,8 +522,8 @@ public partial class UpdateHandler : IUpdateHandler
 
     private async Task HandleOrderAction(Message message, CancellationToken cancellationToken)
     {
-        var existUser = await userService.GetByChatId(message.Chat.Id);
-        var cart = await cartService.GetByUserId(existUser.Id);
+        var user = existUser[message.Chat.Id];
+        var cart = await cartService.GetByUserId(user.Id);
 
         if (cart.Items.Count() > 0)
         {
@@ -557,11 +559,11 @@ public partial class UpdateHandler : IUpdateHandler
     {
         this.logger.LogInformation("ShowOrderAsync is working...");
 
-        var existUser = await userService.GetByChatId(message.Chat.Id);
+        var user = existUser[message.Chat.Id];
 
         if (message.Text == "✅ Tasdiqlash")
         {
-            var cart = await cartService.GetByUserId(existUser.Id);
+            var cart = await cartService.GetByUserId(user.Id);
 
             var order = new OrderCreationDto()
             {
@@ -571,7 +573,7 @@ public partial class UpdateHandler : IUpdateHandler
                 PaymentMethod = paymentMethod.TryGetValue(message.Chat.Id, out var payMethod) ? payMethod : default(PaymentMethod),
                 MarketAddress = branch.TryGetValue(message.Chat.Id, out var br) ? br : null,
                 CartId = cart.Id,
-                UserId = existUser.Id
+                UserId = user.Id
             };
 
             var orderResult = await this.orderService.AddAsync(order);
@@ -633,14 +635,14 @@ public partial class UpdateHandler : IUpdateHandler
                 break;
         }
 
-        var existUser = await userService.GetByChatId(message.Chat.Id);
-        var cart = await cartService.GetByUserId(existUser.Id);
+        var user = existUser[message.Chat.Id];
+        var cart = await cartService.GetByUserId(user.Id);
 
         var cartItems = await cartItemService.GetByCartId(cart.Id);
 
         var cartItemsText = string.Join("\n\n", cartItems.Select(item => $"{item.Product.Name}: {item.Quantity} x {item.Price} = {item.Sum}"));
         cartItemsText = "🛒 Savat:\n\n" + cartItemsText;
-        cartItemsText = $"Sizning buyurtmangiz:\n\n Buyurtma turi: {orderType[message.Chat.Id].ToString()}\n\n ☎️ Telefon: {existUser.Phone}\n\n 💴 To'lov turi: {paymentMethod[message.Chat.Id].ToString()}\n\n Izohlar: {description[message.Chat.Id]}\n\n" + cartItemsText;
+        cartItemsText = $"Sizning buyurtmangiz:\n\n Buyurtma turi: {orderType[message.Chat.Id].ToString()}\n\n ☎️ Telefon: {user.Phone}\n\n 💴 To'lov turi: {paymentMethod[message.Chat.Id].ToString()}\n\n Izohlar: {description[message.Chat.Id]}\n\n" + cartItemsText;
         cartItemsText += $"\n\n Jami: {cart.TotalPrice} so'm";
 
         var replyKeyboard = new ReplyKeyboardMarkup(new[]
@@ -690,9 +692,9 @@ public partial class UpdateHandler : IUpdateHandler
     private async Task HandleCartAsync(Message message, CancellationToken cancellationToken)
     {
         this.logger.LogInformation("HandleCartAsync is working..");
-        var existUser = await userService.GetByChatId(message.Chat.Id);
+        var user = existUser[message.Chat.Id];
 
-        var cart = await cartService.GetByUserId(existUser.Id);
+        var cart = await cartService.GetByUserId(user.Id);
 
         var cartItems = await cartItemService.GetByCartId(cart.Id);
         if (cartItems.Count() > 0)
@@ -761,8 +763,8 @@ public partial class UpdateHandler : IUpdateHandler
     private async Task HandleProductForDeleteAsync(Message message, CancellationToken cancellationToken)
     {
         this.logger.LogInformation("HandleProductForDeleteAsync is working..");
-        var existUser = await userService.GetByChatId(message.Chat.Id);
-        var cart = await cartService.GetByUserId(existUser.Id);
+        var user = existUser[message.Chat.Id];
+        var cart = await cartService.GetByUserId(user.Id);
         var productName = message.Text;
 
         var isTrue = await cartItemService.DeleteByProductName(cart.Id, productName);
@@ -783,8 +785,8 @@ public partial class UpdateHandler : IUpdateHandler
     private async Task HandleCleanCartAsync(Message message, CancellationToken cancellationToken)
     {
         this.logger.LogInformation("HandleCleanCartAsync is working...");
-        var existUser = await userService.GetByChatId(message.Chat.Id);
-        var cart = await cartService.GetByUserId(existUser.Id);
+        var user = existUser[message.Chat.Id];
+        var cart = await cartService.GetByUserId(user.Id);
 
         var isTrue = await cartItemService.DeleteAllCartItems(cart.Id);
         if (isTrue)

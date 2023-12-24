@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OnlineMarket.Data.DbContexts;
@@ -11,9 +12,11 @@ using OnlineMarket.Data.DbContexts;
 namespace OnlineMarket.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231218113421_InitialMig")]
+    partial class InitialMig
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -124,7 +127,7 @@ namespace OnlineMarket.Data.Migrations
                         new
                         {
                             Id = 1L,
-                            CreatedAt = new DateTime(2023, 12, 18, 12, 5, 23, 789, DateTimeKind.Utc).AddTicks(358),
+                            CreatedAt = new DateTime(2023, 12, 18, 11, 34, 21, 274, DateTimeKind.Utc).AddTicks(5355),
                             Description = "Category description 1",
                             IsDelete = false,
                             Name = "FastFood",
@@ -133,7 +136,7 @@ namespace OnlineMarket.Data.Migrations
                         new
                         {
                             Id = 2L,
-                            CreatedAt = new DateTime(2023, 12, 18, 12, 5, 23, 789, DateTimeKind.Utc).AddTicks(364),
+                            CreatedAt = new DateTime(2023, 12, 18, 11, 34, 21, 274, DateTimeKind.Utc).AddTicks(5361),
                             Description = "Category description 2",
                             IsDelete = false,
                             Name = "Ichimliklar",
@@ -142,7 +145,7 @@ namespace OnlineMarket.Data.Migrations
                         new
                         {
                             Id = 3L,
-                            CreatedAt = new DateTime(2023, 12, 18, 12, 5, 23, 789, DateTimeKind.Utc).AddTicks(367),
+                            CreatedAt = new DateTime(2023, 12, 18, 11, 34, 21, 274, DateTimeKind.Utc).AddTicks(5363),
                             Description = "Category description 3",
                             IsDelete = false,
                             Name = "Kaboblar",
@@ -151,7 +154,7 @@ namespace OnlineMarket.Data.Migrations
                         new
                         {
                             Id = 4L,
-                            CreatedAt = new DateTime(2023, 12, 18, 12, 5, 23, 789, DateTimeKind.Utc).AddTicks(370),
+                            CreatedAt = new DateTime(2023, 12, 18, 11, 34, 21, 274, DateTimeKind.Utc).AddTicks(5364),
                             Description = "Category description 4",
                             IsDelete = false,
                             Name = "Suyuq ovqatlar",
@@ -160,7 +163,7 @@ namespace OnlineMarket.Data.Migrations
                         new
                         {
                             Id = 5L,
-                            CreatedAt = new DateTime(2023, 12, 18, 12, 5, 23, 789, DateTimeKind.Utc).AddTicks(372),
+                            CreatedAt = new DateTime(2023, 12, 18, 11, 34, 21, 274, DateTimeKind.Utc).AddTicks(5365),
                             Description = "Category description 5",
                             IsDelete = false,
                             Name = "Go'shtli ovqatlar",
@@ -169,7 +172,7 @@ namespace OnlineMarket.Data.Migrations
                         new
                         {
                             Id = 6L,
-                            CreatedAt = new DateTime(2023, 12, 18, 12, 5, 23, 789, DateTimeKind.Utc).AddTicks(377),
+                            CreatedAt = new DateTime(2023, 12, 18, 11, 34, 21, 274, DateTimeKind.Utc).AddTicks(5367),
                             Description = "Category description 6",
                             IsDelete = false,
                             Name = "Shashliklar",
@@ -178,7 +181,7 @@ namespace OnlineMarket.Data.Migrations
                         new
                         {
                             Id = 7L,
-                            CreatedAt = new DateTime(2023, 12, 18, 12, 5, 23, 789, DateTimeKind.Utc).AddTicks(379),
+                            CreatedAt = new DateTime(2023, 12, 18, 11, 34, 21, 274, DateTimeKind.Utc).AddTicks(5368),
                             Description = "Category description 7",
                             IsDelete = false,
                             Name = "Salatlar",
@@ -187,7 +190,7 @@ namespace OnlineMarket.Data.Migrations
                         new
                         {
                             Id = 8L,
-                            CreatedAt = new DateTime(2023, 12, 18, 12, 5, 23, 789, DateTimeKind.Utc).AddTicks(381),
+                            CreatedAt = new DateTime(2023, 12, 18, 11, 34, 21, 274, DateTimeKind.Utc).AddTicks(5369),
                             Description = "Category description 8",
                             IsDelete = false,
                             Name = "Xamirli ovqatlar",
@@ -223,7 +226,7 @@ namespace OnlineMarket.Data.Migrations
                         new
                         {
                             Id = 1L,
-                            CreatedAt = new DateTime(2023, 12, 18, 12, 5, 23, 789, DateTimeKind.Utc).AddTicks(447),
+                            CreatedAt = new DateTime(2023, 12, 18, 11, 34, 21, 274, DateTimeKind.Utc).AddTicks(5411),
                             IsDelete = false,
                             Location = "Novza",
                             UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
@@ -231,7 +234,7 @@ namespace OnlineMarket.Data.Migrations
                         new
                         {
                             Id = 2L,
-                            CreatedAt = new DateTime(2023, 12, 18, 12, 5, 23, 789, DateTimeKind.Utc).AddTicks(452),
+                            CreatedAt = new DateTime(2023, 12, 18, 11, 34, 21, 274, DateTimeKind.Utc).AddTicks(5415),
                             IsDelete = false,
                             Location = "Chilonzor",
                             UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
@@ -239,7 +242,7 @@ namespace OnlineMarket.Data.Migrations
                         new
                         {
                             Id = 3L,
-                            CreatedAt = new DateTime(2023, 12, 18, 12, 5, 23, 789, DateTimeKind.Utc).AddTicks(453),
+                            CreatedAt = new DateTime(2023, 12, 18, 11, 34, 21, 274, DateTimeKind.Utc).AddTicks(5415),
                             IsDelete = false,
                             Location = "Sergeli",
                             UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
@@ -247,7 +250,7 @@ namespace OnlineMarket.Data.Migrations
                         new
                         {
                             Id = 4L,
-                            CreatedAt = new DateTime(2023, 12, 18, 12, 5, 23, 789, DateTimeKind.Utc).AddTicks(454),
+                            CreatedAt = new DateTime(2023, 12, 18, 11, 34, 21, 274, DateTimeKind.Utc).AddTicks(5416),
                             IsDelete = false,
                             Location = "Oq-tepa",
                             UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
@@ -385,7 +388,7 @@ namespace OnlineMarket.Data.Migrations
                         {
                             Id = 1L,
                             CategoryId = 1L,
-                            CreatedAt = new DateTime(2023, 12, 18, 12, 5, 23, 789, DateTimeKind.Utc).AddTicks(385),
+                            CreatedAt = new DateTime(2023, 12, 18, 11, 34, 21, 274, DateTimeKind.Utc).AddTicks(5374),
                             Description = "Product Desc",
                             IsDelete = false,
                             Name = "HotDog",
@@ -397,7 +400,7 @@ namespace OnlineMarket.Data.Migrations
                         {
                             Id = 2L,
                             CategoryId = 1L,
-                            CreatedAt = new DateTime(2023, 12, 18, 12, 5, 23, 789, DateTimeKind.Utc).AddTicks(398),
+                            CreatedAt = new DateTime(2023, 12, 18, 11, 34, 21, 274, DateTimeKind.Utc).AddTicks(5382),
                             Description = "Product Desc2",
                             IsDelete = false,
                             Name = "Gamburger",
@@ -409,7 +412,7 @@ namespace OnlineMarket.Data.Migrations
                         {
                             Id = 3L,
                             CategoryId = 1L,
-                            CreatedAt = new DateTime(2023, 12, 18, 12, 5, 23, 789, DateTimeKind.Utc).AddTicks(402),
+                            CreatedAt = new DateTime(2023, 12, 18, 11, 34, 21, 274, DateTimeKind.Utc).AddTicks(5383),
                             Description = "Product Desc3",
                             IsDelete = false,
                             Name = "Lavash",
@@ -421,7 +424,7 @@ namespace OnlineMarket.Data.Migrations
                         {
                             Id = 4L,
                             CategoryId = 1L,
-                            CreatedAt = new DateTime(2023, 12, 18, 12, 5, 23, 789, DateTimeKind.Utc).AddTicks(405),
+                            CreatedAt = new DateTime(2023, 12, 18, 11, 34, 21, 274, DateTimeKind.Utc).AddTicks(5385),
                             Description = "Product Desc4",
                             IsDelete = false,
                             Name = "Non burger",
@@ -433,7 +436,7 @@ namespace OnlineMarket.Data.Migrations
                         {
                             Id = 5L,
                             CategoryId = 2L,
-                            CreatedAt = new DateTime(2023, 12, 18, 12, 5, 23, 789, DateTimeKind.Utc).AddTicks(407),
+                            CreatedAt = new DateTime(2023, 12, 18, 11, 34, 21, 274, DateTimeKind.Utc).AddTicks(5386),
                             Description = "Product Desc5",
                             IsDelete = false,
                             Name = "Coco-Cola",
@@ -445,7 +448,7 @@ namespace OnlineMarket.Data.Migrations
                         {
                             Id = 6L,
                             CategoryId = 2L,
-                            CreatedAt = new DateTime(2023, 12, 18, 12, 5, 23, 789, DateTimeKind.Utc).AddTicks(411),
+                            CreatedAt = new DateTime(2023, 12, 18, 11, 34, 21, 274, DateTimeKind.Utc).AddTicks(5388),
                             Description = "Product Desc6",
                             IsDelete = false,
                             Name = "Pepsi",
@@ -457,7 +460,7 @@ namespace OnlineMarket.Data.Migrations
                         {
                             Id = 7L,
                             CategoryId = 2L,
-                            CreatedAt = new DateTime(2023, 12, 18, 12, 5, 23, 789, DateTimeKind.Utc).AddTicks(414),
+                            CreatedAt = new DateTime(2023, 12, 18, 11, 34, 21, 274, DateTimeKind.Utc).AddTicks(5390),
                             Description = "Product Desc7",
                             IsDelete = false,
                             Name = "Fanta",
@@ -469,7 +472,7 @@ namespace OnlineMarket.Data.Migrations
                         {
                             Id = 8L,
                             CategoryId = 2L,
-                            CreatedAt = new DateTime(2023, 12, 18, 12, 5, 23, 789, DateTimeKind.Utc).AddTicks(416),
+                            CreatedAt = new DateTime(2023, 12, 18, 11, 34, 21, 274, DateTimeKind.Utc).AddTicks(5391),
                             Description = "Product Desc8",
                             IsDelete = false,
                             Name = "Kompot",
@@ -481,7 +484,7 @@ namespace OnlineMarket.Data.Migrations
                         {
                             Id = 9L,
                             CategoryId = 3L,
-                            CreatedAt = new DateTime(2023, 12, 18, 12, 5, 23, 789, DateTimeKind.Utc).AddTicks(418),
+                            CreatedAt = new DateTime(2023, 12, 18, 11, 34, 21, 274, DateTimeKind.Utc).AddTicks(5392),
                             Description = "Product Desc5",
                             IsDelete = false,
                             Name = "Tovuq kabob",
@@ -493,7 +496,7 @@ namespace OnlineMarket.Data.Migrations
                         {
                             Id = 10L,
                             CategoryId = 3L,
-                            CreatedAt = new DateTime(2023, 12, 18, 12, 5, 23, 789, DateTimeKind.Utc).AddTicks(422),
+                            CreatedAt = new DateTime(2023, 12, 18, 11, 34, 21, 274, DateTimeKind.Utc).AddTicks(5395),
                             Description = "Product Desc6",
                             IsDelete = false,
                             Name = "Lo'la kabob",
@@ -505,7 +508,7 @@ namespace OnlineMarket.Data.Migrations
                         {
                             Id = 11L,
                             CategoryId = 3L,
-                            CreatedAt = new DateTime(2023, 12, 18, 12, 5, 23, 789, DateTimeKind.Utc).AddTicks(424),
+                            CreatedAt = new DateTime(2023, 12, 18, 11, 34, 21, 274, DateTimeKind.Utc).AddTicks(5396),
                             Description = "Product Desc5",
                             IsDelete = false,
                             Name = "Mol kabob",
@@ -517,7 +520,7 @@ namespace OnlineMarket.Data.Migrations
                         {
                             Id = 12L,
                             CategoryId = 3L,
-                            CreatedAt = new DateTime(2023, 12, 18, 12, 5, 23, 789, DateTimeKind.Utc).AddTicks(426),
+                            CreatedAt = new DateTime(2023, 12, 18, 11, 34, 21, 274, DateTimeKind.Utc).AddTicks(5398),
                             Description = "Product Desc6",
                             IsDelete = false,
                             Name = "Qo'y kabob",
@@ -529,7 +532,7 @@ namespace OnlineMarket.Data.Migrations
                         {
                             Id = 13L,
                             CategoryId = 4L,
-                            CreatedAt = new DateTime(2023, 12, 18, 12, 5, 23, 789, DateTimeKind.Utc).AddTicks(429),
+                            CreatedAt = new DateTime(2023, 12, 18, 11, 34, 21, 274, DateTimeKind.Utc).AddTicks(5399),
                             Description = "Product Desc13",
                             IsDelete = false,
                             Name = "Sho'rva",
@@ -541,7 +544,7 @@ namespace OnlineMarket.Data.Migrations
                         {
                             Id = 14L,
                             CategoryId = 4L,
-                            CreatedAt = new DateTime(2023, 12, 18, 12, 5, 23, 789, DateTimeKind.Utc).AddTicks(431),
+                            CreatedAt = new DateTime(2023, 12, 18, 11, 34, 21, 274, DateTimeKind.Utc).AddTicks(5400),
                             Description = "Product Desc14",
                             IsDelete = false,
                             Name = "Mastava",
@@ -553,7 +556,7 @@ namespace OnlineMarket.Data.Migrations
                         {
                             Id = 15L,
                             CategoryId = 5L,
-                            CreatedAt = new DateTime(2023, 12, 18, 12, 5, 23, 789, DateTimeKind.Utc).AddTicks(434),
+                            CreatedAt = new DateTime(2023, 12, 18, 11, 34, 21, 274, DateTimeKind.Utc).AddTicks(5402),
                             Description = "Product Desc13",
                             IsDelete = false,
                             Name = "Qozon kabob",
@@ -565,7 +568,7 @@ namespace OnlineMarket.Data.Migrations
                         {
                             Id = 16L,
                             CategoryId = 5L,
-                            CreatedAt = new DateTime(2023, 12, 18, 12, 5, 23, 789, DateTimeKind.Utc).AddTicks(436),
+                            CreatedAt = new DateTime(2023, 12, 18, 11, 34, 21, 274, DateTimeKind.Utc).AddTicks(5403),
                             Description = "Product Desc14",
                             IsDelete = false,
                             Name = "Tovuq go'shti",
@@ -577,7 +580,7 @@ namespace OnlineMarket.Data.Migrations
                         {
                             Id = 17L,
                             CategoryId = 6L,
-                            CreatedAt = new DateTime(2023, 12, 18, 12, 5, 23, 789, DateTimeKind.Utc).AddTicks(438),
+                            CreatedAt = new DateTime(2023, 12, 18, 11, 34, 21, 274, DateTimeKind.Utc).AddTicks(5404),
                             Description = "Product Desc13",
                             IsDelete = false,
                             Name = "Qiyma shashlik",
@@ -589,7 +592,7 @@ namespace OnlineMarket.Data.Migrations
                         {
                             Id = 18L,
                             CategoryId = 6L,
-                            CreatedAt = new DateTime(2023, 12, 18, 12, 5, 23, 789, DateTimeKind.Utc).AddTicks(442),
+                            CreatedAt = new DateTime(2023, 12, 18, 11, 34, 21, 274, DateTimeKind.Utc).AddTicks(5407),
                             Description = "Product Desc14",
                             IsDelete = false,
                             Name = "Burda shashlik",
@@ -597,31 +600,6 @@ namespace OnlineMarket.Data.Migrations
                             StockQuantity = 10,
                             UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         });
-                });
-
-            modelBuilder.Entity("OnlineMarket.Domain.Entities.Users.Security", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsDelete")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Password")
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Security");
                 });
 
             modelBuilder.Entity("OnlineMarket.Domain.Entities.Users.User", b =>

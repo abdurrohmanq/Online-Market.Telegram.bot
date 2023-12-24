@@ -1,5 +1,6 @@
 ﻿using OnlineMarket.Domain.Enums;
 using OnlineMarket.Service.DTOs.Carts;
+using OnlineMarket.Service.DTOs.Users;
 
 namespace OnlineMarket.Service.DTOs.Orders;
 
@@ -12,4 +13,7 @@ public class OrderResultDto
     public string MarketAddress { get; set; }
     public PaymentMethod PaymentMethod { get; set; }
     public CartResultDto Cart { get; set; }
+    public UserResultDto User { get; set; }
+    public ICollection<OrderItemResultDto> Items { get; set; }
+
 }

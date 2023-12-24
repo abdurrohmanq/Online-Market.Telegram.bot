@@ -19,12 +19,23 @@ public class AppDbContext : DbContext
     public DbSet<Order> Orders { get; set; }
     public DbSet<Filial> Filials { get; set; }
     public DbSet<Product> Products { get; set; }
+    public DbSet<Security> Security { get; set; }
     public DbSet<CartItem> CartItems { get; set; }
     public DbSet<Category> Categories { get; set; }
     public DbSet<OrderItem> OrderItems { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        #region IsDelete bilan filter
+        modelBuilder.Entity<User>().HasQueryFilter(u => !u.IsDelete);
+        modelBuilder.Entity<Cart>().HasQueryFilter(u => !u.IsDelete);
+        modelBuilder.Entity<Order>().HasQueryFilter(u => !u.IsDelete);
+        modelBuilder.Entity<Filial>().HasQueryFilter(u => !u.IsDelete);
+        modelBuilder.Entity<Product>().HasQueryFilter(u => !u.IsDelete);
+        modelBuilder.Entity<CartItem>().HasQueryFilter(u => !u.IsDelete);
+        modelBuilder.Entity<Category>().HasQueryFilter(u => !u.IsDelete);
+        modelBuilder.Entity<OrderItem>().HasQueryFilter(u => !u.IsDelete);
+        #endregion
 
         modelBuilder.Entity<Category>()
             .HasMany(c => c.Products)
