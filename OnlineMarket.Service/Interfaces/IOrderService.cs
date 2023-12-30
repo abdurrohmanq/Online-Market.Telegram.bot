@@ -8,5 +8,6 @@ public interface IOrderService
     Task<OrderResultDto> UpdateAsync(OrderUpdateDto dto);
     Task<bool> DeleteAsync(long id);
     Task<OrderResultDto> GetById(long id);
+    Task<IEnumerable<OrderResultDto>> GetByUserAsync(string query);
     Task<IEnumerable<OrderResultDto>> GetAllAsync();
 }

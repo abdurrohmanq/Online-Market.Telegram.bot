@@ -24,6 +24,9 @@ public partial class UpdateHandler
         if (message.Text == "/admin" && admin is not null)
             isAdminPage[message.Chat.Id] = true;
 
+        if (message.Text == "/start")
+            isAdminPage[message.Chat.Id] = false;
+
         var adminPage = isAdminPage.TryGetValue(message.Chat.Id, out var state) ? state : false;
 
         if (adminPage)

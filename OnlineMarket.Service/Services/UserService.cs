@@ -63,7 +63,7 @@ public class UserService : IUserService
 
     public async Task<UserResultDto> GetById(long id)
     {
-        var existUser = await repository.GetAsync(user => user.Id.Equals(id))
+        var existUser = await repository.GetAsync(user => user.Id.Equals(id), includes: new[] { "Order.Items.Product" })
             ?? throw new NotFoundException($"This user is not found with id {id}");
 
         return this.mapper.Map<UserResultDto>(existUser);

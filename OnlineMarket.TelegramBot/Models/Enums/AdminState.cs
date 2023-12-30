@@ -4,8 +4,9 @@ public enum AdminState
 {
     None,
     AdminPage,
+    
+    //Products
     ManageProductPage,
-    WaitingForCategoryId,
     WaitingForProductPrice,
     WaitingForPasswordEnter,
     WaitingForSelectionMenu,
@@ -17,10 +18,37 @@ public enum AdminState
     WaitingForProductNameEnter,
     WaitingForUpdateProductName,
     WaitingForUpdateProductDesc,
-    WaitingForCategorySelection,
     WaitingForProductDescription,
     WaitingForUpdateProductPrice,
     WaitingForUpdateProductQuantity,
     WaitingForUpdateProductCategory,
-    WaitingForUpdateProductProperty
+    WaitingForUpdateProductProperty,
+
+    //Categories
+    ManageCategoryPage,
+    WaitingForCategoryId,
+    HandleSelectCategoryForGet,
+    WaitingForCategoryNameEnter,
+    WaitingForCategorySelection,
+    WaitingForUpdateCategoryDesc,
+    WaitingForCategoryDescription,
+    WaitingCategorySelectForUpdate,
+    WaitingForCategoryNameForUpdate,
+    WaitingForCategoryInfoSelection,
+    WaitingForUpdateCategoryProperty,
+    WaitingForCategorySelectionForDelete,
+
+    //Filial
+    ManageFilialPage,
+    WaitingForGetAllFilial,
+    WaitingForFilialSelection,
+    WaitingForHandleDeleteFilial,
+    WaitingForUpdatingFilialName,
+    WaitingForCreatingFilialEnter,
+    WaitingForUpdatingFilialEnter,
+
+    //Orders
+    ManageOrderPage,
+    WaitingForOrderIdForDelete,
+    WaitingForEnterUserInfo,
 }

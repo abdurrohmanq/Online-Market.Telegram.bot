@@ -98,7 +98,8 @@ public partial class UpdateHandler
         var replyKeyboard = new ReplyKeyboardMarkup(new[]
         {
             new[] { new KeyboardButton("Mahsulotlarni boshqarish"),  new KeyboardButton("Filiallarni boshqarish") },
-            new[] { new KeyboardButton("Buyurtmalarni boshqarish"),  new KeyboardButton("Parolni o'zgartirish") },
+            new[] { new KeyboardButton("Buyurtmalarni boshqarish"),  new KeyboardButton("Categoriyalarni boshqarish") },
+            new[] { new KeyboardButton("Parolni o'zgartirish") },
         })
         {
             ResizeKeyboard = true
@@ -434,10 +435,14 @@ public partial class UpdateHandler
                 text: $"{updateProduct[message.Chat.Id].Name} categoriyasi '{existCategory.Name}' ga o'zgardi!",
                 cancellationToken: cancellationToken);
             else
+            {
                 await botClient.SendTextMessageAsync(
                 chatId: message.Chat.Id,
                 text: $"Mahsulotni barcha qismlari o'zgardi!",
                 cancellationToken: cancellationToken);
+
+                allUpdate[message.Chat.Id] = false;
+            }
 
             adminStates[message.Chat.Id] = AdminState.WaitingForUpdateProductProperty;
         }
@@ -478,13 +483,13 @@ public partial class UpdateHandler
         createProduct[message.Chat.Id] = newProduct;
 
         var keyboard = new ReplyKeyboardMarkup(new[]
-                       {
-                            new KeyboardButton("🏠 Asosiy menu"),
-                            new KeyboardButton("⬅️ Ortga")
-                       })
-                       {
-                            ResizeKeyboard = true
-                       };
+        {
+            new KeyboardButton("🏠 Asosiy menu"),
+            new KeyboardButton("⬅️ Ortga")
+        })
+        {
+            ResizeKeyboard = true
+        };
 
         await botClient.SendTextMessageAsync(
             chatId: message.Chat.Id,
@@ -714,46 +719,6 @@ public partial class UpdateHandler
             cancellationToken: cancellationToken);
     }
 
-    private async Task HandlerForFilialAsync(Message message, CancellationToken cancellationToken)
-    {
-        this.logger.LogInformation("HandlerForFilialAsync is working..");
-
-        var replyKeyboard = new ReplyKeyboardMarkup(new[]
-        {
-            new[] { new KeyboardButton("Yangi filial qo'shish"),  new KeyboardButton("filial o'chirish") },
-            new[] { new KeyboardButton("filialni yangilash"),  new KeyboardButton("Barcha filiallar ro'yxati") },
-        })
-        {
-            ResizeKeyboard = true
-        };
-
-        await botClient.SendTextMessageAsync(
-            chatId: message.Chat.Id,
-            text: "Tanlovingizni belgilang!",
-            replyMarkup: replyKeyboard,
-            cancellationToken: cancellationToken);
-    }
-
-    private async Task HandlerForOrderAsync(Message message, CancellationToken cancellationToken)
-    {
-        this.logger.LogInformation("HandlerForOrderAsync is working..");
-
-        var replyKeyboard = new ReplyKeyboardMarkup(new[]
-        {
-            new[] { new KeyboardButton("Buyurtmani o'chirish"), new KeyboardButton("Ma'lum bir foydalanuvchi buyurtmalari") },
-            new[] { new KeyboardButton("Buyurtmani yangilash"),  new KeyboardButton("Barcha buyurtmalar ro'yxati") },
-        })
-        {
-            ResizeKeyboard = true
-        };
-
-        await botClient.SendTextMessageAsync(
-            chatId: message.Chat.Id,
-            text: "Tanlovingizni belgilang!",
-            replyMarkup: replyKeyboard,
-            cancellationToken: cancellationToken);
-    }
-
     private async Task UpdatePasswordAsync(Message message, CancellationToken cancellationToken)
     {
         this.logger.LogInformation("UpdatePasswordAsync is working..");
@@ -773,5 +738,7 @@ public partial class UpdateHandler
             text: $"Parol {message.Text} ga o'zgardi",
             replyMarkup: replyKeyboard,
             cancellationToken: cancellationToken);
+
+        await DisplayMenuAsync(message, cancellationToken);
     }
 }

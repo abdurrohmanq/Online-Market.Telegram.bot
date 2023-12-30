@@ -8,6 +8,7 @@ using OnlineMarket.Domain.Entities.Carts;
 using OnlineMarket.Domain.Entities.Orders;
 using OnlineMarket.Domain.Entities.Products;
 using OnlineMarket.Data.DbContexts;
+using OnlineMarket.Domain.Entities.Users;
 
 namespace OnlineMarket.Service.Services;
 
@@ -16,19 +17,22 @@ public class OrderService : IOrderService
     private readonly IMapper mapper;
     private readonly IRepository<Order> repository;
     private readonly IRepository<Cart> cartRepository;
+    private readonly IRepository<User> userRepository;
     private readonly ICartItemService cartItemService;
     private readonly IRepository<Product> productRepository;
     public OrderService(IMapper mapper,
                         IRepository<Order> repository,
                         IRepository<Cart> cartRepository,
                         ICartItemService cartItemService,
-                        IRepository<Product> productRepository)
+                        IRepository<Product> productRepository,
+                        IRepository<User> userRepository)
     {
         this.mapper = mapper;
         this.repository = repository;
         this.cartRepository = cartRepository;
         this.cartItemService = cartItemService;
         this.productRepository = productRepository;
+        this.userRepository = userRepository;
     }
 
     public async Task<OrderResultDto> AddAsync(OrderCreationDto dto)
@@ -83,7 +87,21 @@ public class OrderService : IOrderService
 
     public async Task<IEnumerable<OrderResultDto>> GetAllAsync()
     {
-        var allOrders = await repository.GetAll(includes: new[] {"User", "Items"}).ToListAsync();
+        var allOrders = await repository.GetAll(includes: new[] {"User", "Items.Product"}).ToListAsync();
+
+        return this.mapper.Map<IEnumerable<OrderResultDto>>(allOrders);
+    }
+
+    public async Task<IEnumerable<OrderResultDto>> GetByUserAsync(string query)
+    {
+        var allOrders = await repository
+            .GetAll(
+                o => EF.Functions.Like(o.User.FullName, $"%{query}%")
+                    || EF.Functions.Like(o.User.Phone, $"%{query}%")
+                    || EF.Functions.Like(o.User.UserName, $"%{query}%"),
+                includes: new[] { "User", "Items.Product" }
+            )
+            .ToListAsync();
 
         return this.mapper.Map<IEnumerable<OrderResultDto>>(allOrders);
     }

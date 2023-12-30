@@ -33,8 +33,9 @@ public class FilialService : IFilialService
 
     public async Task<bool> DeleteAsync(long id)
     {
-        var existFilial = await repository.GetAsync(filial => filial.Id.Equals(id))
-            ?? throw new NotFoundException($"This Filial is not found with id {id}");
+        var existFilial = await repository.GetAsync(filial => filial.Id.Equals(id));
+        if (existFilial is null)
+            return false;
 
         this.repository.Delete(existFilial);
         await this.repository.SaveChanges();

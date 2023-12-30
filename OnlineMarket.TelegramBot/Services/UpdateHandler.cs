@@ -93,6 +93,8 @@ public partial class UpdateHandler : IUpdateHandler
              text: "Tanlovingizni belgilang:",
              replyMarkup: replyKeyboard,
              cancellationToken: cancellationToken);
+
+        userStates[message.Chat.Id] = UserState.None;
     }
 
 
@@ -504,7 +506,7 @@ public partial class UpdateHandler : IUpdateHandler
         var selectedCategoryName = message.Text;
 
         products[message.Chat.Id] = await productService.GetByCategoryName(selectedCategoryName);
-        if (products.Count() == 0)
+        if (products[message.Chat.Id].Count() == 0)
         {
             await botClient.SendTextMessageAsync(
             chatId: message.Chat.Id,
@@ -606,7 +608,7 @@ public partial class UpdateHandler : IUpdateHandler
                     text: "Buyurtma tasdiqlandi. Buyurtmangizni olib ketishingiz mumkin.",
                     cancellationToken: cancellationToken);
 
-
+            await BotOnSendMenuAsync(message, cancellationToken);
         }
         else if (message.Text == "❌ Bekor qilish")
         {
