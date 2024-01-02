@@ -219,7 +219,7 @@ public partial class UpdateHandler
             new[] { new KeyboardButton("Mahsulot nomi"),  new KeyboardButton("Mahsulot tavsifi") },
             new[] { new KeyboardButton("Mahsulotni narxi"),  new KeyboardButton("Mahsulor miqdorini") },
             new[] { new KeyboardButton("Mahsulot categoriyasini"),  new KeyboardButton("Barchasini") },
-            new[] { new KeyboardButton("⬅️ Ortga") },
+            new[] { new KeyboardButton("🏠 Asosiy menu"), new KeyboardButton("⬅️ Ortga") },
             })
                 {
                     ResizeKeyboard = true
@@ -269,6 +269,7 @@ public partial class UpdateHandler
                 new[] { new KeyboardButton("Mahsulot nomi"),  new KeyboardButton("Mahsulot tavsifi") },
                 new[] { new KeyboardButton("Mahsulotni narxi"),  new KeyboardButton("Mahsulor miqdorini") },
                 new[] { new KeyboardButton("Mahsulot categoriyasini"),  new KeyboardButton("Barchasini") },
+                new[] { new KeyboardButton("🏠 Asosiy menu") },
             })
             {
                 ResizeKeyboard = true
@@ -307,6 +308,7 @@ public partial class UpdateHandler
                 new[] { new KeyboardButton("Mahsulot nomi"),  new KeyboardButton("Mahsulot tavsifi") },
                 new[] { new KeyboardButton("Mahsulotni narxi"),  new KeyboardButton("Mahsulor miqdorini") },
                 new[] { new KeyboardButton("Mahsulot categoriyasini"),  new KeyboardButton("Barchasini") },
+                new[] { new KeyboardButton("🏠 Asosiy menu") },
             })
             {
                 ResizeKeyboard = true
@@ -347,6 +349,7 @@ public partial class UpdateHandler
                 new[] { new KeyboardButton("Mahsulot nomi"),  new KeyboardButton("Mahsulot tavsifi") },
                 new[] { new KeyboardButton("Mahsulotni narxi"),  new KeyboardButton("Mahsulor miqdorini") },
                 new[] { new KeyboardButton("Mahsulot categoriyasini"),  new KeyboardButton("Barchasini") },
+                new[] { new KeyboardButton("🏠 Asosiy menu") },
                 })
                 {
                     ResizeKeyboard = true
@@ -390,9 +393,21 @@ public partial class UpdateHandler
             {
                 await this.productService.UpdateAsync(updateProduct[message.Chat.Id]);
 
+                var replyKeyboard = new ReplyKeyboardMarkup(new[]
+                {
+                new[] { new KeyboardButton("Mahsulot nomi"),  new KeyboardButton("Mahsulot tavsifi") },
+                new[] { new KeyboardButton("Mahsulotni narxi"),  new KeyboardButton("Mahsulor miqdorini") },
+                new[] { new KeyboardButton("Mahsulot categoriyasini"),  new KeyboardButton("Barchasini") },
+                new[] { new KeyboardButton("🏠 Asosiy menu") },
+                })
+                {
+                    ResizeKeyboard = true
+                };
+
                 await botClient.SendTextMessageAsync(
                 chatId: message.Chat.Id,
                 text: $"{updateProduct[message.Chat.Id].Name} miqdori '{quantity}' ga o'zgardi!",
+                replyMarkup: replyKeyboard,
                 cancellationToken: cancellationToken);
 
                 adminStates[message.Chat.Id] = AdminState.WaitingForUpdateProductProperty;
@@ -429,10 +444,22 @@ public partial class UpdateHandler
             updateProduct[message.Chat.Id].CategoryId = existCategory.Id;
             await this.productService.UpdateAsync(updateProduct[message.Chat.Id]);
 
+            var replyKeyboard = new ReplyKeyboardMarkup(new[]
+                {
+                new[] { new KeyboardButton("Mahsulot nomi"),  new KeyboardButton("Mahsulot tavsifi") },
+                new[] { new KeyboardButton("Mahsulotni narxi"),  new KeyboardButton("Mahsulor miqdorini") },
+                new[] { new KeyboardButton("Mahsulot categoriyasini"),  new KeyboardButton("Barchasini") },
+                new[] { new KeyboardButton("🏠 Asosiy menu") },
+                })
+            {
+                ResizeKeyboard = true
+            };
+
             if (!allUpdate[message.Chat.Id])
                 await botClient.SendTextMessageAsync(
                 chatId: message.Chat.Id,
                 text: $"{updateProduct[message.Chat.Id].Name} categoriyasi '{existCategory.Name}' ga o'zgardi!",
+                replyMarkup: replyKeyboard,
                 cancellationToken: cancellationToken);
             else
             {
@@ -458,7 +485,7 @@ public partial class UpdateHandler
         var selectedCategoryName = message.Text;
 
         products[message.Chat.Id] = await productService.GetByCategoryName(selectedCategoryName);
-        if (products.Count() == 0)
+        if (products[message.Chat.Id].Count() == 0)
         {
             await botClient.SendTextMessageAsync(
             chatId: message.Chat.Id,

@@ -101,6 +101,7 @@ public partial class UpdateHandler
                 }
                 break;
 
+            //Order
             case AdminState.ManageOrderPage:
                 switch(message.Text)
                 {
@@ -167,8 +168,7 @@ public partial class UpdateHandler
                         break;
 
                     case "Barcha filiallar ro'yxati":
-                        isGetAllFilial[message.Chat.Id] = true;
-                        await GetAllFilialAsync(message, cancellationToken);
+                        await ShowAllFilialAsync(message, cancellationToken);
 
                         adminStates[message.Chat.Id] = AdminState.WaitingForGetAllFilial;
                         break;

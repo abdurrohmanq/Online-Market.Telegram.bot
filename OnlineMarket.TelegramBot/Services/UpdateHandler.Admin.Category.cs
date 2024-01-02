@@ -93,15 +93,15 @@ public partial class UpdateHandler
         this.logger.LogInformation("HandleSelectCategoryForDeleteAsync is working..");
 
         var categoryName = message.Text;
-        existCategory[message.Chat.Id] = await this.categoryService.GetByName(categoryName);
-        if (existCategory is null)
+        var existingCategory = await this.categoryService.GetByName(categoryName);
+        if (existingCategory is null)
             await botClient.SendTextMessageAsync(
                 chatId: message.Chat.Id,
                 text: "Bunday nomli category yo'q",
                 cancellationToken: cancellationToken);
         else
         {
-            await this.categoryService.DeleteAsync(existCategory[message.Chat.Id].Id);
+            await this.categoryService.DeleteAsync(existingCategory.Id);
 
             await botClient.SendTextMessageAsync(
                 chatId: message.Chat.Id,

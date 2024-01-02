@@ -5,6 +5,8 @@ using OnlineMarket.TelegramBot.Models.Enums;
 using OnlineMarket.Service.DTOs.Categories;
 using OnlineMarket.Service.DTOs.Filials;
 using OnlineMarket.Domain.Enums;
+using OnlineMarket.Domain.Entities.Orders;
+using OnlineMarket.Domain.Entities.Users;
 
 namespace OnlineMarket.TelegramBot.Services;
 
@@ -66,22 +68,10 @@ public partial class UpdateHandler
         var branches = await this.filialService.GetAllAsync();
 
 
-        var additionalButtons = new List<KeyboardButton>();
-        if (isGetAllFilial[message.Chat.Id])
-        {
-            additionalButtons = new List<KeyboardButton>()
-            {
-                new KeyboardButton("🏠 Asosiy menu"),
-                new KeyboardButton("Yangi filial qo'shish")
-            };
-        }
-        else
-        {
-            additionalButtons = new List<KeyboardButton>()
+        var additionalButtons = new List<KeyboardButton>()
             {
                 new KeyboardButton("🏠 Asosiy menu"),
             };
-        }
 
         var allButtons = new List<KeyboardButton[]>();
         var rowButtons = new List<KeyboardButton>();
@@ -112,7 +102,6 @@ public partial class UpdateHandler
             text: "Filialni tanlang:",
             replyMarkup: replyKeyboard,
             cancellationToken: cancellationToken);
-        isGetAllFilial[message.Chat.Id] = false;
     }
 
     private Dictionary<long, long> filialId = new Dictionary<long, long>();
@@ -137,6 +126,34 @@ public partial class UpdateHandler
             chatId: message.Chat.Id,
             text: "Bunday filial yo'q",
             cancellationToken: cancellationToken);
+    }
+
+    private async Task ShowAllFilialAsync(Message message, CancellationToken cancellationToken)
+    {
+        this.logger.LogInformation("ShowAllFilialAsync is working...");
+
+        var branches = await this.filialService.GetAllAsync();
+
+        var keyboard = new ReplyKeyboardMarkup(new[]
+        {
+            new KeyboardButton("🏠 Asosiy menu"),
+            new KeyboardButton("Yangi filial qo'shish"),
+        })
+        {
+            ResizeKeyboard = true
+        };
+
+        foreach (var branch in branches)
+        {
+            var branchInfo = $"Filial №{branch.Id}\n" +
+                             $"Manzil: {branch.Location}\n";
+
+            await botClient.SendTextMessageAsync(
+                chatId: message.Chat.Id,
+                text: branchInfo,
+                replyMarkup: keyboard,
+                cancellationToken: cancellationToken);
+        }
     }
 
     private async Task HandleUpdateFilialNameAsync(Message message, CancellationToken cancellationToken)

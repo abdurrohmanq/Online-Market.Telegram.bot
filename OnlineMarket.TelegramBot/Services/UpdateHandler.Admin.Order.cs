@@ -141,11 +141,15 @@ public partial class UpdateHandler
         {
             long orderId = long.Parse(message.Text);
             var result = await this.orderService.DeleteAsync(orderId);
-            if(result)
+            if (result)
+            {
                 await botClient.SendTextMessageAsync(
                 chatId: message.Chat.Id,
                 text: "Buyurtma muvaffaqiyatli o'chirildi!",
                 cancellationToken: cancellationToken);
+
+                await HandlerForOrderAsync(message, cancellationToken);
+            }
             else
                 await botClient.SendTextMessageAsync(
                 chatId: message.Chat.Id,
